@@ -7,45 +7,64 @@
 */
 
 module kb_vsearch {
-    typedef string workspace_name;
-    typedef string read_seq_set_id; /* must be SingleEndLibrary */
-    typedef string feature_id;
-    typedef string feature_set_id;
-    typedef string genome_id;
-    typedef string genome_set_id;
-
-    typedef structure {
-        workspace_name workspace;
-        read_seq_set_id seq_set_one_id;
-        read_seq_set_id seq_set_many_id;
-	feature_id feature_one_id;
-	feature_set_id feature_set_many_id;
-	genome_id genome_many_id;
-	genome_set_id genome_set_many_id;
-    } VSearchBasicSearchParams;
+    typedef string workspace_id;
 
     /* 
-    **    The workspace ID for a ContigSet data object.
+    **    The workspace object refs are of form:
+    **
     **    @id ws KBaseGenomes.ContigSet
     */
-    /*typedef string ws_contigset_id;*/
+    typedef string ws_read_seq_set_ref; /* must be SingleEndLibrary */
+    typedef string ws_feature_ref;
+    typedef string ws_feature_set_ref;
+    typedef string ws_genome_ref;
+    typedef string ws_genome_set_ref;
+    typedef string read_seq_set_name;
+    typedef string feature_set_name;
 
-    typedef string ws_read_seq_set_id;
-    /*typedef string ws_feature_id;*/   /* these do not exist independently? */
-    typedef string ws_feature_set_id;
-    typedef string ws_genome_id;
-    typedef string ws_genome_set_id;
+    typedef string report_name;
+    typedef string ws_report_ref;
 
 
+    /* VSearch BasicSearch Input Params
+    */
     typedef structure {
-        ws_contigset_id new_contigset_ref;
-        int n_initial_contigs;
-        int n_seqs_below_threshold;
-        int n_seqs_above_threshold;
-    } VSearchBasicSearchResults
+        workspace_id         workspace_id;
+        ws_read_seq_set_ref  seq_set_one_ref;
+        ws_read_seq_set_ref  seq_set_many_ref;
+	ws_feature_ref       feature_one_ref;
+	ws_feature_set_ref   feature_set_many_ref;
+	ws_genome_ref        genome_many_ref;
+	ws_genome_set_ref    genome_set_many_ref;
+
+	read_seq_set_name    read_seq_set_output_name;
+	feature_set_name     feature_set_output_name;
+
+	int    maxaccepts;
+	int    maxrejects;
+	int    wordlength;
+	int    minwordmatches;
+	float  ident_thresh;
+	int    ident_mode;
+    } VSearch_BasicSearch_Params;
+
+
+    /* VSearch BasicSearch Output
+    */
+    typedef structure {
+	report_name    output_report_name;
+	ws_report_ref  output_report_ref;
+
+        ws_seq_set_ref      seq_set_output_ref;
+        ws_feature_set_ref  feature_set_output_ref;
+
+        int n_initial_seqs;
+        int n_seqs_matched;
+        int n_seqs_notmatched;
+    } VSearch_BasicSearch_Output
 	
     /*
     **  Do basic search of one sequence against many sequences
     */
-    funcdef vsearch_basic_search(VSearchBasicSearchParams params) returns (VSearchBasicSearchResults) authentication required;
+    funcdef VSearch_BasicSearch(VSearch_BasicSearch_Params params) returns (VSearch_BasicSearch_Output) authentication required;
 };
