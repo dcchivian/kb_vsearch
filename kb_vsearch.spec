@@ -30,8 +30,8 @@ module kb_vsearch {
     */
     typedef structure {
         workspace_id         workspace_id;
-        ws_read_seq_set_ref  seq_set_one_ref;
-        ws_read_seq_set_ref  seq_set_many_ref;
+        ws_read_seq_set_ref  read_seq_set_one_ref;
+        ws_read_seq_set_ref  read_seq_set_many_ref;
 	ws_feature_ref       feature_one_ref;
 	ws_feature_set_ref   feature_set_many_ref;
 	ws_genome_ref        genome_many_ref;
@@ -55,16 +55,16 @@ module kb_vsearch {
 	report_name    output_report_name;
 	ws_report_ref  output_report_ref;
 
-        ws_seq_set_ref      seq_set_output_ref;
+        ws_read_seq_set_ref      read_seq_set_output_ref;
         ws_feature_set_ref  feature_set_output_ref;
 
         int n_initial_seqs;
         int n_seqs_matched;
         int n_seqs_notmatched;
-    } VSearch_BasicSearch_Output
+    } VSearch_BasicSearch_Output;
 	
     /*
     **  Do basic search of one sequence against many sequences
     */
-    funcdef VSearch_BasicSearch(VSearch_BasicSearch_Params params) returns (VSearch_BasicSearch_Output) authentication required;
+    funcdef VSearch_BasicSearch (VSearch_BasicSearch_Params params)  returns (VSearch_BasicSearch_Output) authentication required;
 };
