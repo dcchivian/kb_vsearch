@@ -11,24 +11,16 @@ module kb_vsearch {
     /* 
     ** The workspace object refs are of form:
     **
-    **    objects = ws.get_objects([{'ref': params['workspace_id']+'/'+params['obj_id']}])
+    **    objects = ws.get_objects([{'ref': params['workspace_id']+'/'+params['obj_name']}])
     **
-    ** "ref" means the entire name combining the workspace id and the object id
-    ** "id" means just the portion of the ref corresponding to workspace or object
-    ** "name" should not be used except as a field within an object
+    ** "ref" means the entire name combining the workspace id and the object name
+    ** "id" is a numerical identifier of the workspace or object, and should just be used for workspace
+    ** "name" is a string identifier of a workspace or object.  This is received from Narrative.
     */
     typedef string workspace_id;
-
-
-    /* we will be overloading object types as follows:
-    **
-    **    input_one_id: SingleEndLibrary, FeatureSet
-    **    input_many_id: SingleEndLibrary, FeatureSet, Genome, GenomeSet
-    **    output_id: SingleEndLibrary (if input_many is SELib), FeatureSet
-    */  
-    typedef string one_id;
-    typedef string many_id;
-    typedef string output_id;
+    typedef string one_name;
+    typedef string many_name;
+    typedef string output_name;
     typedef string output_ref;
 
     typedef string report_id;
@@ -39,9 +31,9 @@ module kb_vsearch {
     */
     typedef structure {
         workspace_id  workspace_id;
-	one_id        input_one_id;
-	many_id       input_many_id;
-        output_id     output_filtered_id;
+	one_name      input_one_name;
+	many_name     input_many_name;
+        output_name   output_filtered_name;
 
 	int    maxaccepts;
 	int    maxrejects;
