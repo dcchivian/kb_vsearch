@@ -7,38 +7,41 @@
 */
 
 module kb_vsearch {
-    typedef string workspace_id;
 
     /* 
-    **    The workspace object refs are of form:
+    ** The workspace object refs are of form:
     **
-    **    @id ws KBaseGenomes.ContigSet
+    **    objects = ws.get_objects([{'ref': params['workspace_id']+'/'+params['obj_id']}])
+    **
+    ** "ref" means the entire name combining the workspace id and the object id
+    ** "id" means just the portion of the ref corresponding to workspace or object
+    ** "name" should not be used except as a field within an object
     */
-    typedef string ws_read_seq_set_ref; /* must be SingleEndLibrary */
-    typedef string ws_feature_ref;
-    typedef string ws_feature_set_ref;
-    typedef string ws_genome_ref;
-    typedef string ws_genome_set_ref;
-    typedef string read_seq_set_name;
-    typedef string feature_set_name;
+    typedef string workspace_id;
 
-    typedef string report_name;
-    typedef string ws_report_ref;
+
+    /* we will be overloading object types as follows:
+    **
+    **    input_one_id: SingleEndLibrary, FeatureSet
+    **    input_many_id: SingleEndLibrary, FeatureSet, Genome, GenomeSet
+    **    output_id: SingleEndLibrary (if input_many is SELib), FeatureSet
+    */  
+    typedef string one_id;
+    typedef string many_id;
+    typedef string output_id;
+    typedef string output_ref;
+
+    typedef string report_id;
+    typedef string report_ref;
 
 
     /* VSearch BasicSearch Input Params
     */
     typedef structure {
-        workspace_id         workspace_id;
-        ws_read_seq_set_ref  read_seq_set_one_ref;
-        ws_read_seq_set_ref  read_seq_set_many_ref;
-	ws_feature_ref       feature_one_ref;
-	ws_feature_set_ref   feature_set_many_ref;
-	ws_genome_ref        genome_many_ref;
-	ws_genome_set_ref    genome_set_many_ref;
-
-	read_seq_set_name    read_seq_set_output_name;
-	feature_set_name     feature_set_output_name;
+        workspace_id  workspace_id;
+	one_id        input_one_id;
+	many_id       input_many_id;
+        output_id     output_filtered_id;
 
 	int    maxaccepts;
 	int    maxrejects;
@@ -52,19 +55,23 @@ module kb_vsearch {
     /* VSearch BasicSearch Output
     */
     typedef structure {
-	report_name    output_report_name;
-	ws_report_ref  output_report_ref;
+	report_id   output_report_id;
+	report_ref  output_report_ref;
 
-        ws_read_seq_set_ref      read_seq_set_output_ref;
-        ws_feature_set_ref  feature_set_output_ref;
+        output_ref  output_filtered_ref;
 
         int n_initial_seqs;
         int n_seqs_matched;
         int n_seqs_notmatched;
     } VSearch_BasicSearch_Output;
 	
-    /*
-    **  Do basic search of one sequence against many sequences
+
+    /*  Method for BasicSearch of one sequence against many sequences 
+    **
+    **    overloading as follows:
+    **        input_one_id: SingleEndLibrary, FeatureSet
+    **        input_many_id: SingleEndLibrary, FeatureSet, Genome, GenomeSet
+    **        output_id: SingleEndLibrary (if input_many is SELib), FeatureSet
     */
     funcdef VSearch_BasicSearch (VSearch_BasicSearch_Params params)  returns (VSearch_BasicSearch_Output) authentication required;
 };
