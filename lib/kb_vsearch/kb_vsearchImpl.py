@@ -87,6 +87,9 @@ class kb_vsearch:
         #BEGIN VSearch_BasicSearch
         self.log(console,'Running VSearch_BasicSearch with params=')
         self.log(console, pformat(params))
+        report = 'Running VSearch_BasicSearch with params='
+        report += "\n"+pformat(params)
+
 
         #### do some basic checks
         objref = ''
@@ -296,6 +299,9 @@ class kb_vsearch:
         #
         self.log(console, 'running vsearch:')
         self.log(console, '    '+' '.join(vsearch_cmd))
+        report += "\n"+'running vsearch:'+"\n"
+        report += '    '+' '.join(vsearch_cmd)+"\n"
+
         p = subprocess.Popen(vsearch_cmd,
                     cwd = self.scratch,
                     stdout = subprocess.PIPE, 
@@ -323,9 +329,11 @@ class kb_vsearch:
         output_aln_filehandle = open (output_aln_file, "r", 0)
         output_aln_buf = output_aln_filehandle.readlines()
         output_aln_filehandle.close()
+        hit_total = 0
         for line in output_aln_buf:
             # hits have lines of format 'Query >1367929'
             if line.startswith('Query >'):
+                hit_total += 1
                 hit_seq_id = line[7:]  # removes leading '>'
                 hit_seq_id = hit_seq_id[0:hit_seq_id.find("\n")]
                 hit_seq_id = hit_seq_id[0:hit_seq_id.find("\t")]
@@ -341,11 +349,13 @@ class kb_vsearch:
 
         if many_type_name == 'SingleEndSequence':
             with open(many_forward_reads_file, 'r', -1) as many_forward_reads_filehandle, open(output_filter_fasta_file, 'w', -1) as output_filter_fasta_filehandle:
+                seq_total = 0;
                 last_seq_buf = []
                 last_seq_id = None
                 last_header = None
                 for line in many_forward_reads_filehandle:
                     if line.startswith('>'):
+                        seq_total += 1
                         seq_id = line[1:]
                         seq_id = seq_id[0:seq_id.find("\n")]
                         seq_id = seq_id[0:seq_id.find("\t")]
@@ -387,6 +397,7 @@ class kb_vsearch:
 
         # Warning: this reads everything into memory!  Will not work if 
         # the output is very large!
+        """
         contigset_data = {
             'id':'megahit.contigset',
             'source':'User assembled contigs from reads in KBase',
@@ -407,23 +418,52 @@ class kb_vsearch:
             }
             lengths.append(contig['length'])
             contigset_data['contigs'].append(contig)
-
+        """
 
         # load the method provenance from the context object
         provenance = [{}]
         if 'provenance' in ctx:
             provenance = ctx['provenance']
         # add additional info to provenance here, in this case the input data object reference
-        provenance[0]['input_ws_objects']=[params['workspace_name']+'/'+params['read_library_name']]
+        provenance[0]['input_ws_objects']=[params['workspace_name']+'/'+params['input_many_name']]
 
+
+        # upload reads
+        #
+        cmdstring = " ".join( ('ws-tools fastX2reads',
+                               '--inputfile', output_filter_fasta_file,
+                               '--wsurl', self.workspaceURL,
+                               '--shockurl', self.shockURL,
+                               '--outws', input_params['output_ws'],
+                               '--outobj', input_params['output_read_library'],
+                               '--readcount', readcount,
+                               '--token', token
+                               ) )
+        
+        cmdProcess = subprocess.Popen(cmdstring, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        stdout, stderr = cmdProcess.communicate()
+        report += "cmdstring: " + cmdstring + " stdout: " + stdout + " stderr: " + stderr
+
+
+        # add to report
+        #
+        report += 'sequences in many set: '+seq_total
+        report += 'sequences in hit set:  '+hit_total
 
 
         #END VSearch_BasicSearch
 
 
         # At some point might do deeper type checking...
-        if not isinstance(returnVal, dict):
-            raise ValueError('Method VSearch_BasicSearch return value ' +
-                             'returnVal is not type dict as required.')
+        if not isinstance(report, basestring):
+            raise ValueError('Method runTrimmomatic return value ' +
+                             'report is not type basestring as required.')
         # return the results
-        return [returnVal]
+        return [report]
+
+#        # At some point might do deeper type checking...
+#        if not isinstance(returnVal, dict):
+#            raise ValueError('Method VSearch_BasicSearch return value ' +
+#                             'returnVal is not type dict as required.')
+#        # return the results
+#        return [returnVal]
