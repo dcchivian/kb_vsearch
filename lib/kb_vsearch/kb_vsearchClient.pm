@@ -26,8 +26,11 @@ kb_vsearch::kb_vsearchClient
 =head1 DESCRIPTION
 
 
-A KBase module: kb_vsearch
-This sample module contains one small method - filter_contigs.
+** A KBase module: kb_vsearch
+**
+** This module contains 4 methods from VSEARCH: basic query/db search, clustering, chimera detection, and dereplication.
+** 
+** Initially only basic query/db search will be implemented between read sets
 
 
 =cut
@@ -110,9 +113,9 @@ sub new
 
 
 
-=head2 filter_contigs
+=head2 VSearch_BasicSearch
 
-  $return = $obj->filter_contigs($params)
+  $return = $obj->VSearch_BasicSearch($params)
 
 =over 4
 
@@ -121,20 +124,33 @@ sub new
 =begin html
 
 <pre>
-$params is a kb_vsearch.FilterContigsParams
-$return is a kb_vsearch.FilterContigsResults
-FilterContigsParams is a reference to a hash where the following keys are defined:
-	workspace has a value which is a kb_vsearch.workspace_name
-	contigset_id has a value which is a kb_vsearch.contigset_id
-	min_length has a value which is an int
-workspace_name is a string
-contigset_id is a string
-FilterContigsResults is a reference to a hash where the following keys are defined:
-	new_contigset_ref has a value which is a kb_vsearch.ws_contigset_id
-	n_initial_contigs has a value which is an int
-	n_contigs_removed has a value which is an int
-	n_contigs_remaining has a value which is an int
-ws_contigset_id is a string
+$params is a kb_vsearch.VSearch_BasicSearch_Params
+$return is a kb_vsearch.VSearch_BasicSearch_Output
+VSearch_BasicSearch_Params is a reference to a hash where the following keys are defined:
+	workspace_id has a value which is a kb_vsearch.workspace_id
+	input_one_name has a value which is a kb_vsearch.one_name
+	input_many_name has a value which is a kb_vsearch.many_name
+	output_filtered_name has a value which is a kb_vsearch.output_name
+	maxaccepts has a value which is an int
+	maxrejects has a value which is an int
+	wordlength has a value which is an int
+	minwordmatches has a value which is an int
+	ident_thresh has a value which is a float
+	ident_mode has a value which is an int
+workspace_id is a string
+one_name is a string
+many_name is a string
+output_name is a string
+VSearch_BasicSearch_Output is a reference to a hash where the following keys are defined:
+	output_report_id has a value which is a kb_vsearch.report_id
+	output_report_ref has a value which is a kb_vsearch.report_ref
+	output_filtered_ref has a value which is a kb_vsearch.output_ref
+	n_initial_seqs has a value which is an int
+	n_seqs_matched has a value which is an int
+	n_seqs_notmatched has a value which is an int
+report_id is a string
+report_ref is a string
+output_ref is a string
 
 </pre>
 
@@ -142,33 +158,51 @@ ws_contigset_id is a string
 
 =begin text
 
-$params is a kb_vsearch.FilterContigsParams
-$return is a kb_vsearch.FilterContigsResults
-FilterContigsParams is a reference to a hash where the following keys are defined:
-	workspace has a value which is a kb_vsearch.workspace_name
-	contigset_id has a value which is a kb_vsearch.contigset_id
-	min_length has a value which is an int
-workspace_name is a string
-contigset_id is a string
-FilterContigsResults is a reference to a hash where the following keys are defined:
-	new_contigset_ref has a value which is a kb_vsearch.ws_contigset_id
-	n_initial_contigs has a value which is an int
-	n_contigs_removed has a value which is an int
-	n_contigs_remaining has a value which is an int
-ws_contigset_id is a string
+$params is a kb_vsearch.VSearch_BasicSearch_Params
+$return is a kb_vsearch.VSearch_BasicSearch_Output
+VSearch_BasicSearch_Params is a reference to a hash where the following keys are defined:
+	workspace_id has a value which is a kb_vsearch.workspace_id
+	input_one_name has a value which is a kb_vsearch.one_name
+	input_many_name has a value which is a kb_vsearch.many_name
+	output_filtered_name has a value which is a kb_vsearch.output_name
+	maxaccepts has a value which is an int
+	maxrejects has a value which is an int
+	wordlength has a value which is an int
+	minwordmatches has a value which is an int
+	ident_thresh has a value which is a float
+	ident_mode has a value which is an int
+workspace_id is a string
+one_name is a string
+many_name is a string
+output_name is a string
+VSearch_BasicSearch_Output is a reference to a hash where the following keys are defined:
+	output_report_id has a value which is a kb_vsearch.report_id
+	output_report_ref has a value which is a kb_vsearch.report_ref
+	output_filtered_ref has a value which is a kb_vsearch.output_ref
+	n_initial_seqs has a value which is an int
+	n_seqs_matched has a value which is an int
+	n_seqs_notmatched has a value which is an int
+report_id is a string
+report_ref is a string
+output_ref is a string
 
 
 =end text
 
 =item Description
 
-Filter contigs in a ContigSet by DNA length
+Method for BasicSearch of one sequence against many sequences 
+**
+**    overloading as follows:
+**        input_one_id: SingleEndLibrary, FeatureSet
+**        input_many_id: SingleEndLibrary, FeatureSet, Genome, GenomeSet
+**        output_id: SingleEndLibrary (if input_many is SELib), FeatureSet
 
 =back
 
 =cut
 
- sub filter_contigs
+ sub VSearch_BasicSearch
 {
     my($self, @args) = @_;
 
@@ -177,7 +211,7 @@ Filter contigs in a ContigSet by DNA length
     if ((my $n = @args) != 1)
     {
 	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
-							       "Invalid argument count for function filter_contigs (received $n, expecting 1)");
+							       "Invalid argument count for function VSearch_BasicSearch (received $n, expecting 1)");
     }
     {
 	my($params) = @args;
@@ -185,30 +219,30 @@ Filter contigs in a ContigSet by DNA length
 	my @_bad_arguments;
         (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
         if (@_bad_arguments) {
-	    my $msg = "Invalid arguments passed to filter_contigs:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    my $msg = "Invalid arguments passed to VSearch_BasicSearch:\n" . join("", map { "\t$_\n" } @_bad_arguments);
 	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
-								   method_name => 'filter_contigs');
+								   method_name => 'VSearch_BasicSearch');
 	}
     }
 
     my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "kb_vsearch.filter_contigs",
+	method => "kb_vsearch.VSearch_BasicSearch",
 	params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
 	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
 					       code => $result->content->{error}->{code},
-					       method_name => 'filter_contigs',
+					       method_name => 'VSearch_BasicSearch',
 					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
 					      );
 	} else {
 	    return wantarray ? @{$result->result} : $result->result->[0];
 	}
     } else {
-        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method filter_contigs",
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method VSearch_BasicSearch",
 					    status_line => $self->{client}->status_line,
-					    method_name => 'filter_contigs',
+					    method_name => 'VSearch_BasicSearch',
 				       );
     }
 }
@@ -226,16 +260,16 @@ sub version {
             Bio::KBase::Exceptions::JSONRPC->throw(
                 error => $result->error_message,
                 code => $result->content->{code},
-                method_name => 'filter_contigs',
+                method_name => 'VSearch_BasicSearch',
             );
         } else {
             return wantarray ? @{$result->result} : $result->result->[0];
         }
     } else {
         Bio::KBase::Exceptions::HTTP->throw(
-            error => "Error invoking method filter_contigs",
+            error => "Error invoking method VSearch_BasicSearch",
             status_line => $self->{client}->status_line,
-            method_name => 'filter_contigs',
+            method_name => 'VSearch_BasicSearch',
         );
     }
 }
@@ -272,7 +306,7 @@ sub _validate_version {
 
 
 
-=head2 contigset_id
+=head2 workspace_id
 
 =over 4
 
@@ -280,7 +314,13 @@ sub _validate_version {
 
 =item Description
 
-A string representing a ContigSet id.
+** The workspace object refs are of form:
+**
+**    objects = ws.get_objects([{'ref': params['workspace_id']+'/'+params['obj_name']}])
+**
+** "ref" means the entire name combining the workspace id and the object name
+** "id" is a numerical identifier of the workspace or object, and should just be used for workspace
+** "name" is a string identifier of a workspace or object.  This is received from Narrative.
 
 
 =item Definition
@@ -303,7 +343,163 @@ a string
 
 
 
-=head2 workspace_name
+=head2 one_name
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a string
+</pre>
+
+=end html
+
+=begin text
+
+a string
+
+=end text
+
+=back
+
+
+
+=head2 many_name
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a string
+</pre>
+
+=end html
+
+=begin text
+
+a string
+
+=end text
+
+=back
+
+
+
+=head2 output_name
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a string
+</pre>
+
+=end html
+
+=begin text
+
+a string
+
+=end text
+
+=back
+
+
+
+=head2 output_ref
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a string
+</pre>
+
+=end html
+
+=begin text
+
+a string
+
+=end text
+
+=back
+
+
+
+=head2 report_id
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a string
+</pre>
+
+=end html
+
+=begin text
+
+a string
+
+=end text
+
+=back
+
+
+
+=head2 report_ref
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a string
+</pre>
+
+=end html
+
+=begin text
+
+a string
+
+=end text
+
+=back
+
+
+
+=head2 VSearch_BasicSearch_Params
 
 =over 4
 
@@ -311,33 +507,7 @@ a string
 
 =item Description
 
-A string representing a workspace name.
-
-
-=item Definition
-
-=begin html
-
-<pre>
-a string
-</pre>
-
-=end html
-
-=begin text
-
-a string
-
-=end text
-
-=back
-
-
-
-=head2 FilterContigsParams
-
-=over 4
-
+VSearch BasicSearch Input Params
 
 
 =item Definition
@@ -346,9 +516,16 @@ a string
 
 <pre>
 a reference to a hash where the following keys are defined:
-workspace has a value which is a kb_vsearch.workspace_name
-contigset_id has a value which is a kb_vsearch.contigset_id
-min_length has a value which is an int
+workspace_id has a value which is a kb_vsearch.workspace_id
+input_one_name has a value which is a kb_vsearch.one_name
+input_many_name has a value which is a kb_vsearch.many_name
+output_filtered_name has a value which is a kb_vsearch.output_name
+maxaccepts has a value which is an int
+maxrejects has a value which is an int
+wordlength has a value which is an int
+minwordmatches has a value which is an int
+ident_thresh has a value which is a float
+ident_mode has a value which is an int
 
 </pre>
 
@@ -357,9 +534,16 @@ min_length has a value which is an int
 =begin text
 
 a reference to a hash where the following keys are defined:
-workspace has a value which is a kb_vsearch.workspace_name
-contigset_id has a value which is a kb_vsearch.contigset_id
-min_length has a value which is an int
+workspace_id has a value which is a kb_vsearch.workspace_id
+input_one_name has a value which is a kb_vsearch.one_name
+input_many_name has a value which is a kb_vsearch.many_name
+output_filtered_name has a value which is a kb_vsearch.output_name
+maxaccepts has a value which is an int
+maxrejects has a value which is an int
+wordlength has a value which is an int
+minwordmatches has a value which is an int
+ident_thresh has a value which is a float
+ident_mode has a value which is an int
 
 
 =end text
@@ -368,7 +552,7 @@ min_length has a value which is an int
 
 
 
-=head2 ws_contigset_id
+=head2 VSearch_BasicSearch_Output
 
 =over 4
 
@@ -376,34 +560,7 @@ min_length has a value which is an int
 
 =item Description
 
-The workspace ID for a ContigSet data object.
-@id ws KBaseGenomes.ContigSet
-
-
-=item Definition
-
-=begin html
-
-<pre>
-a string
-</pre>
-
-=end html
-
-=begin text
-
-a string
-
-=end text
-
-=back
-
-
-
-=head2 FilterContigsResults
-
-=over 4
-
+VSearch BasicSearch Output
 
 
 =item Definition
@@ -412,10 +569,12 @@ a string
 
 <pre>
 a reference to a hash where the following keys are defined:
-new_contigset_ref has a value which is a kb_vsearch.ws_contigset_id
-n_initial_contigs has a value which is an int
-n_contigs_removed has a value which is an int
-n_contigs_remaining has a value which is an int
+output_report_id has a value which is a kb_vsearch.report_id
+output_report_ref has a value which is a kb_vsearch.report_ref
+output_filtered_ref has a value which is a kb_vsearch.output_ref
+n_initial_seqs has a value which is an int
+n_seqs_matched has a value which is an int
+n_seqs_notmatched has a value which is an int
 
 </pre>
 
@@ -424,10 +583,12 @@ n_contigs_remaining has a value which is an int
 =begin text
 
 a reference to a hash where the following keys are defined:
-new_contigset_ref has a value which is a kb_vsearch.ws_contigset_id
-n_initial_contigs has a value which is an int
-n_contigs_removed has a value which is an int
-n_contigs_remaining has a value which is an int
+output_report_id has a value which is a kb_vsearch.report_id
+output_report_ref has a value which is a kb_vsearch.report_ref
+output_filtered_ref has a value which is a kb_vsearch.output_ref
+n_initial_seqs has a value which is an int
+n_seqs_matched has a value which is an int
+n_seqs_notmatched has a value which is an int
 
 
 =end text

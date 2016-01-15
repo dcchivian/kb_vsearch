@@ -60,9 +60,9 @@ class JSONObjectEncoder(json.JSONEncoder):
 sync_methods = {}
 async_run_methods = {}
 async_check_methods = {}
-async_run_methods['kb_vsearch.filter_contigs_async'] = ['kb_vsearch', 'filter_contigs']
-async_check_methods['kb_vsearch.filter_contigs_check'] = ['kb_vsearch', 'filter_contigs']
-sync_methods['kb_vsearch.filter_contigs'] = True
+async_run_methods['kb_vsearch.VSearch_BasicSearch_async'] = ['kb_vsearch', 'VSearch_BasicSearch']
+async_check_methods['kb_vsearch.VSearch_BasicSearch_check'] = ['kb_vsearch', 'VSearch_BasicSearch']
+sync_methods['kb_vsearch.VSearch_BasicSearch'] = True
 
 class AsyncJobServiceClient(object):
 
@@ -334,10 +334,10 @@ class Application(object):
         self.serverlog.set_log_level(6)
         self.rpc_service = JSONRPCServiceCustom()
         self.method_authentication = dict()
-        self.rpc_service.add(impl_kb_vsearch.filter_contigs,
-                             name='kb_vsearch.filter_contigs',
+        self.rpc_service.add(impl_kb_vsearch.VSearch_BasicSearch,
+                             name='kb_vsearch.VSearch_BasicSearch',
                              types=[dict])
-        self.method_authentication['kb_vsearch.filter_contigs'] = 'required'
+        self.method_authentication['kb_vsearch.VSearch_BasicSearch'] = 'required'
         self.auth_client = biokbase.nexus.Client(
             config={'server': 'nexus.api.globusonline.org',
                     'verify_ssl': True,

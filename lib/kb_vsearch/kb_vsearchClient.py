@@ -171,10 +171,10 @@ class kb_vsearch(object):
             raise ServerError('Unknown', 0, 'An unknown server error occurred')
         return resp['result']
  
-    def filter_contigs(self, params, json_rpc_context = None):
+    def VSearch_BasicSearch(self, params, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
-            raise ValueError('Method filter_contigs: argument json_rpc_context is not type dict as required.')
-        resp = self._call('kb_vsearch.filter_contigs',
+            raise ValueError('Method VSearch_BasicSearch: argument json_rpc_context is not type dict as required.')
+        resp = self._call('kb_vsearch.VSearch_BasicSearch',
                           [params], json_rpc_context)
         return resp[0]
  
