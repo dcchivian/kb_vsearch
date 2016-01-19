@@ -392,9 +392,6 @@ class kb_vsearch:
         #
         #    # build a feature set
 
-
-# HERE
-
         # Warning: this reads everything into memory!  Will not work if 
         # the output is very large!
         """
@@ -425,7 +422,7 @@ class kb_vsearch:
         if 'provenance' in ctx:
             provenance = ctx['provenance']
         # add additional info to provenance here, in this case the input data object reference
-        provenance[0]['input_ws_objects']=[params['workspace_name']+'/'+params['input_many_name']]
+        provenance[0]['input_ws_objects']=[params['workspace_id']+'/'+params['input_many_name']]
 
 
         # upload reads
@@ -434,8 +431,8 @@ class kb_vsearch:
                                '--inputfile', output_filter_fasta_file,
                                '--wsurl', self.workspaceURL,
                                '--shockurl', self.shockURL,
-                               '--outws', input_params['output_ws'],
-                               '--outobj', input_params['output_read_library'],
+                               '--outws', params['output_ws'],
+                               '--outobj', params['output_read_library'],
                                '--readcount', readcount,
                                '--token', token
                                ) )
@@ -445,25 +442,49 @@ class kb_vsearch:
         report += "cmdstring: " + cmdstring + " stdout: " + stdout + " stderr: " + stderr
 
 
-        # add to report
+        # build output report object
         #
         report += 'sequences in many set: '+seq_total
         report += 'sequences in hit set:  '+hit_total
 
+        reportObj = {
+            'objects_created':[{'ref':params['workspace_id']+'/'+params['output_filtered_reads'], 'description':'SingleEndLibrary VSearch_BasicSearch hits'}],
+            'text_message':report
+        }
+
+        reportName = 'vsearch_report_'+str(hex(uuid.getnode()))
+        report_obj_info = ws.save_objects({
+                'id':info[6],
+                'objects':[
+                    {
+                        'type':'KBaseReport.Report',
+                        'data':reportObj,
+                        'name':reportName,
+                        'meta':{},
+                        'hidden':1,
+                        'provenance':provenance
+                    }
+                ]
+            })[0]
+
+        output_return = { 'output_report_id': reportName,
+                          'output_report_ref': str(report_obj_info[6]) + '/' + str(report_obj_info[0]) + '/' + str(report_obj_info[4]),
+                          'output_filtered_ref': params['workspace_id']+'/'+params['output_filtered_reads']
+                          }
 
         #END VSearch_BasicSearch
 
 
         # At some point might do deeper type checking...
-        if not isinstance(report, basestring):
-            raise ValueError('Method runTrimmomatic return value ' +
-                             'report is not type basestring as required.')
-        # return the results
-        return [report]
-
-#        # At some point might do deeper type checking...
-#        if not isinstance(returnVal, dict):
-#            raise ValueError('Method VSearch_BasicSearch return value ' +
-#                             'returnVal is not type dict as required.')
+#        if not isinstance(report, basestring):
+#            raise ValueError('Method runTrimmomatic return value ' +
+#                             'report is not type basestring as required.')
 #        # return the results
-#        return [returnVal]
+#        return [report]
+
+        # At some point might do deeper type checking...
+        if not isinstance(output_return, dict):
+            raise ValueError('Method VSearch_BasicSearch return value ' +
+                             'output_return is not type dict as required.')
+        # return the results
+        return [output_return]
