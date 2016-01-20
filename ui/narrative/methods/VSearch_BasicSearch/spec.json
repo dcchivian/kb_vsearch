@@ -34,11 +34,83 @@
             }
         },
         {
-            "id": "min_length",
+            "id": "output_filtered_name",
             "optional": false,
             "advanced": false,
             "allow_multiple": false,
             "default_values": [ "" ],
+            "field_type": "text",
+            "text_options": {
+                "valid_ws_types": [ "KBaseAssembly.SingleEndLibrary","KBaseFile.SingleEndLibrary","KBaseCollections.FeatureSet" ]
+            }
+        },
+        {
+            "id": "ident_thresh",
+            "optional": false,
+            "advanced": false,
+            "allow_multiple": false,
+            "default_values": [ "0.97" ],
+            "field_type": "text",
+            "text_options": {
+                "validate_as": "int",
+                "min_integer" : 0
+            }
+        },
+
+        {
+            "id": "maxaccepts",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "1000" ],
+            "field_type": "text",
+            "text_options": {
+                "validate_as": "int",
+                "min_integer" : 0
+            }
+        },
+        {
+            "id": "maxrejects",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "10000000000" ],
+            "field_type": "text",
+            "text_options": {
+                "validate_as": "int",
+                "min_integer" : 0
+            }
+        },
+        {
+            "id": "wordlength",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "8" ],
+            "field_type": "text",
+            "text_options": {
+                "validate_as": "int",
+                "min_integer" : 0
+            }
+        },
+        {
+            "id": "minwordmatches",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "10" ],
+            "field_type": "text",
+            "text_options": {
+                "validate_as": "int",
+                "min_integer" : 0
+            }
+        },
+        {
+            "id": "ident_mode",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "2" ],
             "field_type": "text",
             "text_options": {
                 "validate_as": "int",
@@ -50,38 +122,70 @@
         "service-mapping": {
             "url": "",
             "name": "kb_vsearch",
-            "method": "filter_contigs",
+            "method": "VSearch_BasicSearch",
             "input_mapping": [
                 {
                     "narrative_system_variable": "workspace",
-                    "target_property": "workspace"
+                    "target_property": "workspace_id"
                 },
                 {
-                    "input_parameter": "contigset_id",
-                    "target_property": "contigset_id"
+                    "input_parameter": "input_one_name",
+                    "target_property": "input_one_name"
                 },
                 {
-                    "input_parameter": "min_length",
-                    "target_property": "min_length"
+                    "input_parameter": "input_many_name",
+                    "target_property": "input_many_name"
+                },
+                {
+                    "input_parameter": "output_filtered_name",
+                    "target_property": "output_filtered_name"
+                },
+                {
+                    "input_parameter": "ident_thresh",
+                    "target_property": "ident_thresh"
+                },
+                {
+                    "input_parameter": "maxaccepts",
+                    "target_property": "maxaccepts"
+                },
+                {
+                    "input_parameter": "maxrejects",
+                    "target_property": "maxrejects"
+                },
+                {
+                    "input_parameter": "wordlength",
+                    "target_property": "wordlength"
+                },
+                {
+                    "input_parameter": "minwordmatches",
+                    "target_property": "minwordmatches"
+                },
+                {
+                    "input_parameter": "ident_mode",
+                    "target_property": "ident_mode"
                 }
             ],
             "output_mapping": [
                 {
-                    "service_method_output_path": [0],
-                    "target_property": "contig_filter_result"
-                },
-                {
-                    "input_parameter": "contigset_id",
-                    "target_property": "input_contigset_id"
-                },
-                {
-                    "input_parameter": "min_length",
-                    "target_property": "input_min_length"
-                },
-                {
                     "narrative_system_variable": "workspace",
                     "target_property": "workspaceName"
-                }
+                },
+                {
+                    "service_method_output_path": [0, "output_report_id"],
+                    "target_property": "output_report_id"
+                },
+                {
+                    "service_method_output_path": [0, "output_report_ref"],
+                    "target_property": "output_report_ref"
+                },
+                {
+                    "service_method_output_path": [0, "output_filtered_ref"],
+                    "target_property": "output_filtered_ref"
+                },
+                {
+		    "constant_value": "16",
+                    "target_property": "report_window_line_height"
+                },
             ]
         }
     },
