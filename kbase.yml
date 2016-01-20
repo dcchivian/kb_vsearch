@@ -2,7 +2,7 @@ module-name:
     kb_vsearch
 
 module-description:
-    A KBase module
+    Implements VSearch (https://github.com/torognes/vsearch) for rapid DNA sequence similarity searching.  "Basic Search" is available, with "Cluster", and "Chimera" detection forthcoming.
 
 service-language:
     python
