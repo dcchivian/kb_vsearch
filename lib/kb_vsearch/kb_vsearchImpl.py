@@ -467,24 +467,16 @@ class kb_vsearch:
                 ]
             })[0]
 
-        output_return = { 'output_report_id': reportName,
-                          'output_report_ref': str(report_obj_info[6]) + '/' + str(report_obj_info[0]) + '/' + str(report_obj_info[4]),
-                          'output_filtered_ref': params['workspace_id']+'/'+params['output_filtered_reads']
-                          }
+        returnVal = { 'output_report_id': reportName,
+                      'output_report_ref': str(report_obj_info[6]) + '/' + str(report_obj_info[0]) + '/' + str(report_obj_info[4]),
+                      'output_filtered_ref': params['workspace_id']+'/'+params['output_filtered_reads']
+                      }
 
         #END VSearch_BasicSearch
 
-
         # At some point might do deeper type checking...
-#        if not isinstance(report, basestring):
-#            raise ValueError('Method runTrimmomatic return value ' +
-#                             'report is not type basestring as required.')
-#        # return the results
-#        return [report]
-
-        # At some point might do deeper type checking...
-        if not isinstance(output_return, dict):
+        if not isinstance(returnVal, dict):
             raise ValueError('Method VSearch_BasicSearch return value ' +
-                             'output_return is not type dict as required.')
+                             'returnVal is not type dict as required.')
         # return the results
-        return [output_return]
+        return [returnVal]
