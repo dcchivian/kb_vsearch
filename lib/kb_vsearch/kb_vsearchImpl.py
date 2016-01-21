@@ -372,7 +372,7 @@ class kb_vsearch:
                         last_seq_buf = []
                         last_seq_id = seq_id
                         last_header = line
-                    else
+                    else:
                         last_seq_buf.append(line)
                 if last_seq_id != None:
                     try:
