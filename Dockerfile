@@ -43,14 +43,16 @@ WORKDIR /kb/module
 
 RUN make
 
+# add test data
+#
+RUN mkdir -p /kb/module/test
+WORKDIR test
+RUN git clone https://github.com/dcchivian/kb_vsearch_test_data
+WORKDIR ../
+
+
 ENTRYPOINT [ "./scripts/entrypoint.sh" ]
 
 CMD [ ]
-
-# add test data
-#
-WORKDIR test
-RUN git clone https://github.com/dcchivian/kb_vsearch_test_data
-
 
 
