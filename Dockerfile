@@ -30,6 +30,7 @@ WORKDIR vsearch
 RUN ./configure 
 RUN make
 RUN make install
+RUN git clone https://github.com/dcchivian/kb_vsearch_test_data
 WORKDIR ../
 
 # RUN apt-get update
