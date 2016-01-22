@@ -116,7 +116,7 @@ class kb_vsearchTest(unittest.TestCase):
         token = self.ctx['token']
         forward_shock_file = self.upload_file_to_shock(
             shock_service_url = self.shockURL,
-            filePath = 'data/'+name,
+            filePath = 'kb_vsearch_test_data/'+name,
             token = token
             )
         #pprint(forward_shock_file)
@@ -174,7 +174,7 @@ class kb_vsearchTest(unittest.TestCase):
         # figure out where the test data lives
         se_lib_info_one = self.getSingleEndLibInfo('input_one.fna')
         pprint(se_lib_info_one)
-        se_lib_info_one = self.getSingleEndLibInfo('input_many.fna')
+        se_lib_info_one = self.getSingleEndLibInfo('input_many.fna.gz')
         pprint(se_lib_info_many)
 
         # Object Info Contents
