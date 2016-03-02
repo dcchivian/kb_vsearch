@@ -17,23 +17,23 @@ module kb_vsearch {
     ** "id" is a numerical identifier of the workspace or object, and should just be used for workspace
     ** "name" is a string identifier of a workspace or object.  This is received from Narrative.
     */
-    typedef string workspace_id;
+    typedef string workspace_name;
     typedef string one_name;
     typedef string many_name;
     typedef string output_name;
     typedef string output_ref;
 
-    typedef string report_id;
+    typedef string report_name;
     typedef string report_ref;
 
 
     /* VSearch BasicSearch Input Params
     */
     typedef structure {
-        workspace_id  workspace_id;
-	one_name      input_one_name;
-	many_name     input_many_name;
-        output_name   output_filtered_name;
+        workspace_name workspace_name;
+	one_name       input_one_name;
+	many_name      input_many_name;
+        output_name    output_filtered_name;
 
 	int    maxaccepts;
 	int    maxrejects;
@@ -47,7 +47,7 @@ module kb_vsearch {
     /* VSearch BasicSearch Output
     */
     typedef structure {
-	report_id   output_report_id;
+	report_name output_report_name;
 	report_ref  output_report_ref;
 
         output_ref  output_filtered_ref;
