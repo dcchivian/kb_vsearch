@@ -19,7 +19,7 @@
             "default_values": [ "" ],
             "field_type": "text",
             "text_options": {
-                "valid_ws_types": [ "KBaseAssembly.SingleEndLibrary","KBaseFile.SingleEndLibrary","KBaseCollections.FeatureSet" ]
+                "valid_ws_types": [ "KBaseFile.SingleEndLibrary","KBaseFile.SingleEndLibrary","KBaseCollections.FeatureSet" ]
             }
         },
         {
@@ -30,7 +30,7 @@
             "default_values": [ "" ],
             "field_type": "text",
             "text_options": {
-                "valid_ws_types": [ "KBaseAssembly.SingleEndLibrary","KBaseFile.SingleEndLibrary","KBaseCollections.FeatureSet","KBaseGenomes.Genome","KBaseSearch.GenomeSet" ]
+                "valid_ws_types": [ "KBaseFile.SingleEndLibrary","KBaseFile.SingleEndLibrary","KBaseCollections.FeatureSet","KBaseGenomes.Genome","KBaseSearch.GenomeSet" ]
             }
         },
         {
@@ -41,7 +41,7 @@
             "default_values": [ "" ],
             "field_type": "text",
             "text_options": {
-                "valid_ws_types": [ "KBaseAssembly.SingleEndLibrary","KBaseFile.SingleEndLibrary","KBaseCollections.FeatureSet" ]
+                "valid_ws_types": [ "KBaseFile.SingleEndLibrary","KBaseFile.SingleEndLibrary","KBaseCollections.FeatureSet" ]
             }
         },
         {
