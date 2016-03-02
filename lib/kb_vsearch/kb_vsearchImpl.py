@@ -45,6 +45,14 @@ class kb_vsearch:
 
     VSEARCH = '/kb/module/vsearch/bin/vsearch'
 
+    # target is a list for collecting log messages
+    def log(self, target, message):
+        # we should do something better here...
+        if target is not None:
+            target.append(message)
+        print(message)
+        sys.stdout.flush()
+
     def get_single_end_read_library(self, ws_data, ws_info, forward):
         pass
 
@@ -57,24 +65,23 @@ class kb_vsearch:
     def get_genome_set_feature_seqs(self, ws_data, ws_info):
         pass
 
-    def __init__(self, config):
-        self.workspaceURL = config['workspace-url']
-        self.shockURL = config['shock-url']
-        self.handleURL = config['handle-service-url']
+    #END_CLASS_HEADER
 
+    # config contains contents of config file in a hash or None if it couldn't
+    # be found
+    def __init__(self, config):
+        #BEGIN_CONSTRUCTOR
+        self.workspaceURL = config['workspace-url']
         self.scratch = os.path.abspath(config['scratch'])
+        # HACK!! temporary hack for issue where megahit fails on mac because of silent named pipe error
+        #self.host_scratch = self.scratch
+        self.scratch = os.path.join('/kb','module','local_scratch')
+        # end hack
         if not os.path.exists(self.scratch):
             os.makedirs(self.scratch)
 
-    # target is a list for collecting log messages
-    def log(self, target, message):
-        if target is not None:
-            target.append(message)
-        print(message)
-        sys.stdout.flush()
-
-    #END_CLASS_HEADER
-
+        #END_CONSTRUCTOR
+        pass
 
     def VSearch_BasicSearch(self, ctx, params):
         # ctx is the context object
@@ -83,9 +90,6 @@ class kb_vsearch:
         console = []
         self.log(console,'Running VSearch_BasicSearch with params=')
         self.log(console, "\n"+pformat(params))
-
-        token = ctx['token']
-        ws = workspaceService(self.workspaceURL, token=token)
         report = 'Running VSearch_BasicSearch with params='
         report += "\n"+pformat(params)
 
