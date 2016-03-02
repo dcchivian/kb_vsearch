@@ -5,7 +5,7 @@
     ],
     "contact": "help@kbase.us",
     "visible": true,
-    "categories": ["active"],
+    "categories": ["active","sequence"],
     "widgets": {
         "input": null,
         "output": "kbaseReportView"
@@ -126,7 +126,7 @@
             "input_mapping": [
                 {
                     "narrative_system_variable": "workspace",
-                    "target_property": "workspace_id"
+                    "target_property": "workspace_name"
                 },
                 {
                     "input_parameter": "input_one_name",
@@ -171,8 +171,8 @@
                     "target_property": "workspaceName"
                 },
                 {
-                    "service_method_output_path": [0, "output_report_id"],
-                    "target_property": "output_report_id"
+                    "service_method_output_path": [0, "output_report_name"],
+                    "target_property": "output_report_name"
                 },
                 {
                     "service_method_output_path": [0, "output_report_ref"],
