@@ -20,31 +20,30 @@ class kb_vsearchTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         token = environ.get('KB_AUTH_TOKEN', None)
-        cls.ctx = {'token': token, 'provenance': [{'service': 'kb_vsearch',
-            'method': 'please_never_use_it_in_production', 'method_params': []}],
-            'authenticated': 1}
+        cls.ctx = {'token': token}
         config_file = environ.get('KB_DEPLOYMENT_CONFIG', None)
         cls.cfg = {}
         config = ConfigParser()
         config.read(config_file)
         for nameval in config.items('kb_vsearch'):
+            print(nameval[0] + '=' + nameval[1])
             cls.cfg[nameval[0]] = nameval[1]
         cls.wsURL = cls.cfg['workspace-url']
-        cls.wsClient = workspaceService(cls.wsURL, token=token)
+        cls.ws = workspaceService(cls.wsURL, token=token)
         cls.serviceImpl = kb_vsearch(cls.cfg)
 
-        cls.shockURL = cls.cfg['shock-url']  # added
-        cls.handleURL = cls.cfg['handle-service-url']  # added
+        cls.shockURL = cls.cfg['shock-url']
+        cls.handleURL = cls.cfg['handle-service-url']
 
 
     @classmethod
     def tearDownClass(cls):
         if hasattr(cls, 'wsName'):
-            cls.wsClient.delete_workspace({'workspace': cls.wsName})
+            cls.ws.delete_workspace({'workspace': cls.wsName})
             print('Test workspace was deleted')
 
     def getWsClient(self):
-        return self.__class__.wsClient
+        return self.__class__.ws
 
     def getWsName(self):
         if hasattr(self.__class__, 'wsName'):
@@ -174,7 +173,7 @@ class kb_vsearchTest(unittest.TestCase):
         # figure out where the test data lives
         se_lib_info_one = self.getSingleEndLibInfo('input_one.fna')
         pprint(se_lib_info_one)
-        se_lib_info_one = self.getSingleEndLibInfo('input_many.fna.gz')
+        se_lib_info_many = self.getSingleEndLibInfo('input_many.fna.gz')
         pprint(se_lib_info_many)
 
         # Object Info Contents
@@ -192,9 +191,9 @@ class kb_vsearchTest(unittest.TestCase):
 
 
         # run VSearch_BasicSearch
-        workspace_id = se_lib_info_one[7]
+        workspace_name = se_lib_info_one[7]
         params = {
-            'workspace_id': workspace_id,
+            'workspace_name': workspace_name,
             'input_one_name': se_lib_info_one[1],
             'input_many_name':  se_lib_info_many[1],
             'output_filtered_name': 'output_filtered.SingleEndLibrary',
@@ -212,11 +211,11 @@ class kb_vsearchTest(unittest.TestCase):
         pprint(result)
 
         # check the output
-        info_list = self.ws.get_object_info([{'ref':workspace_id + '/output_filtered.SingleEndLibrary'}], 1)
+        info_list = self.ws.get_object_info([{'ref':workspace_name + '/output_filtered.SingleEndLibrary'}], 1)
         self.assertEqual(len(info_list),1)
         output_filtered_info = info_list[0]
         self.assertEqual(output_filtered_info[1],'output_filtered.SingleEndLibrary')
-        self.assertEqual(output_filtered_info[2].split('-')[0],'KBaseAssembly.SingleEndLibrary')
+        self.assertEqual(output_filtered_info[2].split('-')[0],'KBaseFile.SingleEndLibrary')
         #self.assertEqual(output_filtered_info[10]['Number contigs'],'2')
 
 
