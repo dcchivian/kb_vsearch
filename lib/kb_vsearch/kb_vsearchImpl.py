@@ -40,16 +40,10 @@ class kb_vsearch:
     #########################################
     #BEGIN_CLASS_HEADER
     workspaceURL = None
+    shockURL = None
+    handleURL = None
 
     VSEARCH = '/kb/module/vsearch/bin/vsearch'
-
-    # target is a list for collecting log messages
-    def log(self, target, message):
-        # we should do something better here...
-        if target is not None:
-            target.append(message)
-        print(message)
-        sys.stdout.flush()
 
     def get_single_end_read_library(self, ws_data, ws_info, forward):
         pass
@@ -63,38 +57,43 @@ class kb_vsearch:
     def get_genome_set_feature_seqs(self, ws_data, ws_info):
         pass
 
-    #END_CLASS_HEADER
-
-    # config contains contents of config file in a hash or None if it couldn't
-    # be found
     def __init__(self, config):
-        #BEGIN_CONSTRUCTOR
         self.workspaceURL = config['workspace-url']
+        self.shockURL = config['shock-url']
+        self.handleURL = config['handle-service-url']
+
         self.scratch = os.path.abspath(config['scratch'])
-        # HACK!! temporary hack for issue where megahit fails on mac because of silent named pipe error
-        #self.host_scratch = self.scratch
-        self.scratch = os.path.join('/kb','module','local_scratch')
-        # end hack
         if not os.path.exists(self.scratch):
             os.makedirs(self.scratch)
 
-        #END_CONSTRUCTOR
-        pass
+    # target is a list for collecting log messages
+    def log(self, target, message):
+        if target is not None:
+            target.append(message)
+        print(message)
+        sys.stdout.flush()
+
+    #END_CLASS_HEADER
+
 
     def VSearch_BasicSearch(self, ctx, params):
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN VSearch_BasicSearch
+        console = []
         self.log(console,'Running VSearch_BasicSearch with params=')
-        self.log(console, pformat(params))
+        self.log(console, "\n"+pformat(params))
+
+        token = ctx['token']
+        ws = workspaceService(self.workspaceURL, token=token)
         report = 'Running VSearch_BasicSearch with params='
         report += "\n"+pformat(params)
 
 
         #### do some basic checks
         objref = ''
-        if 'workspace_id' not in params:
-            raise ValueError('workspace_id parameter is required')
+        if 'workspace_name' not in params:
+            raise ValueError('workspace_name parameter is required')
         if 'input_one_name' not in params:
             raise ValueError('input_one_name parameter is required')
         if 'input_many_name' not in params:
@@ -106,7 +105,7 @@ class kb_vsearch:
         ##
         try:
             ws = workspaceService(self.workspaceURL, token=ctx['token'])
-            objects = ws.get_objects([{'ref': params['workspace_id']+'/'+params['input_one_name']}])
+            objects = ws.get_objects([{'ref': params['workspace_name']+'/'+params['input_one_name']}])
             data = objects[0]['data']
             info = objects[0]['info']
             # Object Info Contents
@@ -197,7 +196,7 @@ class kb_vsearch:
         ##
         try:
             ws = workspaceService(self.workspaceURL, token=ctx['token'])
-            objects = ws.get_objects([{'ref': params['workspace_id']+'/'+params['input_many_name']}])
+            objects = ws.get_objects([{'ref': params['workspace_name']+'/'+params['input_many_name']}])
             data = objects[0]['data']
             info = objects[0]['info']
             many_type_name = info[2].split('.')[1].split('-')[0]
@@ -422,7 +421,7 @@ class kb_vsearch:
         if 'provenance' in ctx:
             provenance = ctx['provenance']
         # add additional info to provenance here, in this case the input data object reference
-        provenance[0]['input_ws_objects']=[params['workspace_id']+'/'+params['input_many_name']]
+        provenance[0]['input_ws_objects']=[params['workspace_name']+'/'+params['input_many_name']]
 
 
         # upload reads
@@ -448,7 +447,7 @@ class kb_vsearch:
         report += 'sequences in hit set:  '+hit_total
 
         reportObj = {
-            'objects_created':[{'ref':params['workspace_id']+'/'+params['output_filtered_reads'], 'description':'SingleEndLibrary VSearch_BasicSearch hits'}],
+            'objects_created':[{'ref':params['workspace_name']+'/'+params['output_filtered_reads'], 'description':'SingleEndLibrary VSearch_BasicSearch hits'}],
             'text_message':report
         }
 
@@ -467,9 +466,9 @@ class kb_vsearch:
                 ]
             })[0]
 
-        returnVal = { 'output_report_id': reportName,
+        returnVal = { 'output_report_name': reportName,
                       'output_report_ref': str(report_obj_info[6]) + '/' + str(report_obj_info[0]) + '/' + str(report_obj_info[4]),
-                      'output_filtered_ref': params['workspace_id']+'/'+params['output_filtered_reads']
+                      'output_filtered_ref': params['workspace_name']+'/'+params['output_filtered_reads']
                       }
 
         #END VSearch_BasicSearch
