@@ -37,7 +37,6 @@ RUN make
 
 # Install VSEARCH
 #
-RUN mkdir -p /kb/module/vsearch
 WORKDIR /kb/module
 RUN git clone https://github.com/torognes/vsearch
 WORKDIR vsearch
