@@ -305,11 +305,11 @@ class kb_vsearch:
                 vsearch_cmd.append(str(params['minwordmatches']))
         if 'ident_thresh' in params:
             if params['ident_thresh']:
-                vsearch_cmd.append('--ident_thresh')
+                vsearch_cmd.append('--id')
                 vsearch_cmd.append(str(params['ident_thresh']))
         if 'ident_mode' in params:
             if params['ident_mode']:
-                vsearch_cmd.append('--ident_mode')
+                vsearch_cmd.append('--iddef')
                 vsearch_cmd.append(str(params['ident_mode']))
 
 
