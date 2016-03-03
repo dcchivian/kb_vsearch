@@ -205,7 +205,7 @@ class kb_vsearchTest(unittest.TestCase):
             'maxrejects': 100000000,
             'wordlength': 8,
             'minwordmatches': 10,
-            'ident_thresh': 0.97,
+            'ident_thresh': 0.60,
             'ident_mode': 2
         }
 
