@@ -109,8 +109,10 @@ class kb_vsearchTest(unittest.TestCase):
     # call this method to get the WS object info of a Paired End Library (will
     # upload the example data if this is the first time the method is called during tests)
     def getSingleEndLibInfo(self,name):
-        if hasattr(self.__class__, 'SingleEndLibInfo'):
-            return self.__class__.SingleEndLibInfo
+ #       if hasattr(self.__class__, 'SingleEndLibInfo'):
+ #           if self.__class__.SingeEndLibInfo[name]:
+ #               return self.__class__.SingleEndLibInfo[name]
+
         # 1) upload files to shock
         token = self.ctx['token']
         forward_shock_file = self.upload_file_to_shock(
@@ -164,7 +166,9 @@ class kb_vsearchTest(unittest.TestCase):
                                 ]
                             }]
                         })
-        self.__class__.SingleEndLibInfo = new_obj_info[0]
+#        if not hasattr(self.__class__, 'SingleEndLibInfo'):
+#            self.__class__.SingleEndLibInfo = dict()
+#        self.__class__.SingleEndLibInfo[name] = new_obj_info[0]
         return new_obj_info[0]
 
     
