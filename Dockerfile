@@ -23,32 +23,35 @@ RUN \
 
 
 
+# RUN apt-get update
+# -----------------------------------------
+
+# Install SDK Module
+#
+RUN mkdir -p /kb/module
+COPY ./ /kb/module
+RUN mkdir -p /kb/module/work
+WORKDIR /kb/module
+RUN make
+
+
 # Install VSEARCH
 #
+RUN mkdir -p /kb/module/vsearch
+WORKDIR /kb/module
 RUN git clone https://github.com/torognes/vsearch
 WORKDIR vsearch
 RUN ./configure 
 RUN make
 RUN make install
-WORKDIR ../
 
-# RUN apt-get update
-
-# -----------------------------------------
-
-COPY ./ /kb/module
-RUN mkdir -p /kb/module/work
-
-WORKDIR /kb/module
-
-RUN make
 
 # add test data
 #
 RUN mkdir -p /kb/module/test
-WORKDIR test
+WORKDIR /kb/module/test
 RUN git clone https://github.com/dcchivian/kb_vsearch_test_data
-WORKDIR ../
+WORKDIR /kb/module
 
 
 ENTRYPOINT [ "./scripts/entrypoint.sh" ]
