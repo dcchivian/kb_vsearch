@@ -136,10 +136,13 @@ class kb_vsearch:
         #
         if one_type_name == 'SingleEndLibrary':
             try:
-                if 'lib1' in data:
-                    one_forward_reads = data['lib1']['file']
-                elif 'handle_1' in data:
-                    one_forward_reads = data['handle_1']
+                if 'lib' in data:
+                    one_forward_reads = data['lib']['file']
+                elif 'handle' in data:
+                    one_forward_reads = data['handle']
+                else:
+                    self.log(console,"bad structure for 'one_forward_reads'")
+                    raise ValueError("bad structure for 'one_forward_reads'")
                 #if 'lib2' in data:
                 #    reverse_reads = data['lib2']['file']
                 #elif 'handle_2' in data:
@@ -214,10 +217,13 @@ class kb_vsearch:
         #
         if many_type_name == 'SingleEndLibrary':
             try:
-                if 'lib1' in data:
-                    many_forward_reads = data['lib1']['file']
-                elif 'handle_1' in data:
-                    many_forward_reads = data['handle_1']
+                if 'lib' in data:
+                    many_forward_reads = data['lib']['file']
+                elif 'handle' in data:
+                    many_forward_reads = data['handle']
+                else:
+                    self.log(console,"bad structure for 'many_forward_reads'")
+                    raise ValueError("bad structure for 'many_forward_reads'")
                 #if 'lib2' in data:
                 #    reverse_reads = data['lib2']['file']
                 #elif 'handle_2' in data:
@@ -254,8 +260,15 @@ class kb_vsearch:
         #
         #  e.g. vsearch --usearch_global data/input_many.fna --db data/input_one.fna --alnout output/alnout.txt --maxaccepts 10000 --maxrejects 100000000000 --wordlength 8 --minwordmatches 10 --id 0.5 -iddef 2
         #
-
         vsearch_cmd = [self.VSEARCH]
+
+        # check for necessary files
+        if not os.path.isfile(self.VSEARCH):
+            raise ValueError("no such file '"+self.VSEARCH+"'")
+        if not os.path.isfile(one_forward_reads_file_location):
+            raise ValueError("no such file '"+one_forward_reads_file_location+"'")
+        if not os.path.isfile(many_forward_reads_file_location):
+            raise ValueError("no such file '"+many_forward_reads_file_location+"'")
 
         # set the output location
         timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
@@ -265,37 +278,39 @@ class kb_vsearch:
 
         # this is command for basic search mode
         vsearch_cmd.append('--usearch_global')
-        vsearch_cmd.append(many_forward_reads['file_name'])
+#        vsearch_cmd.append(many_forward_reads['file_name'])
+        vsearch_cmd.append(many_forward_reads_file_location)
         vsearch_cmd.append('--db')
-        vsearch_cmd.append(one_forward_reads['file_name'])
+#        vsearch_cmd.append(one_forward_reads['file_name'])
+        vsearch_cmd.append(one_forward_reads_file_location)
         vsearch_cmd.append('--alnout')
         vsearch_cmd.append(output_aln_file)
 
         # options
         if 'maxaccepts' in params:
             if params['maxaccepts']:
-                megahit_cmd.append('--maxaccepts')
-                megahit_cmd.append(str(params['maxaccepts']))
+                vsearch_cmd.append('--maxaccepts')
+                vsearch_cmd.append(str(params['maxaccepts']))
         if 'maxrejects' in params:
             if params['maxrejects']:
-                megahit_cmd.append('--maxrejects')
-                megahit_cmd.append(str(params['maxrejects']))
+                vsearch_cmd.append('--maxrejects')
+                vsearch_cmd.append(str(params['maxrejects']))
         if 'wordlength' in params:
             if params['wordlength']:
-                megahit_cmd.append('--wordlength')
-                megahit_cmd.append(str(params['wordlength']))
+                vsearch_cmd.append('--wordlength')
+                vsearch_cmd.append(str(params['wordlength']))
         if 'minwordmatches' in params:
             if params['minwordmatches']:
-                megahit_cmd.append('--minwordmatches')
-                megahit_cmd.append(str(params['minwordmatches']))
+                vsearch_cmd.append('--minwordmatches')
+                vsearch_cmd.append(str(params['minwordmatches']))
         if 'ident_thresh' in params:
             if params['ident_thresh']:
-                megahit_cmd.append('--ident_thresh')
-                megahit_cmd.append(str(params['ident_thresh']))
+                vsearch_cmd.append('--ident_thresh')
+                vsearch_cmd.append(str(params['ident_thresh']))
         if 'ident_mode' in params:
             if params['ident_mode']:
-                megahit_cmd.append('--ident_mode')
-                megahit_cmd.append(str(params['ident_mode']))
+                vsearch_cmd.append('--ident_mode')
+                vsearch_cmd.append(str(params['ident_mode']))
 
 
         # Run VSEARCH, capture output as it happens
@@ -350,7 +365,7 @@ class kb_vsearch:
         #
         self.log(console, 'filtering many sequences')
 
-        if many_type_name == 'SingleEndSequence':
+        if many_type_name == 'SingleEndLibrary':
             with open(many_forward_reads_file, 'r', -1) as many_forward_reads_filehandle, open(output_filter_fasta_file, 'w', -1) as output_filter_fasta_filehandle:
                 seq_total = 0;
                 last_seq_buf = []
