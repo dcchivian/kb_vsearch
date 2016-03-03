@@ -320,11 +320,11 @@ class kb_vsearch:
         report += "\n"+'running vsearch:'+"\n"
         report += '    '+' '.join(vsearch_cmd)+"\n"
 
-        p = subprocess.Popen(vsearch_cmd,
-                    cwd = self.scratch,
-                    stdout = subprocess.PIPE, 
-                    stderr = subprocess.STDOUT, 
-                    shell = True)
+        p = subprocess.Popen(vsearch_cmd, \
+                             cwd = self.scratch, \
+                             stdout = subprocess.PIPE, \
+                             stderr = subprocess.STDOUT, \
+                             shell = False)
 
         while True:
             line = p.stdout.readline()
