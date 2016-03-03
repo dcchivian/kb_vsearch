@@ -323,7 +323,8 @@ class kb_vsearch:
         p = subprocess.Popen(vsearch_cmd,
                     cwd = self.scratch,
                     stdout = subprocess.PIPE, 
-                    stderr = subprocess.STDOUT, shell = False)
+                    stderr = subprocess.STDOUT, 
+                    shell = True)
 
         while True:
             line = p.stdout.readline()
