@@ -15,8 +15,11 @@ import us.kbase.common.service.UnauthorizedException;
 /**
  * <p>Original spec-file module name: kb_vsearch</p>
  * <pre>
- * A KBase module: kb_vsearch
- * This sample module contains one small method - filter_contigs.
+ * ** A KBase module: kb_vsearch
+ * **
+ * ** This module contains 4 methods from VSEARCH: basic query/db search, clustering, chimera detection, and dereplication.
+ * ** 
+ * ** Initially only basic query/db search will be implemented between read sets
  * </pre>
  */
 public class KbVsearchClient {
@@ -140,20 +143,25 @@ public class KbVsearchClient {
     }
 
     /**
-     * <p>Original spec-file function name: filter_contigs</p>
+     * <p>Original spec-file function name: VSearch_BasicSearch</p>
      * <pre>
-     * Filter contigs in a ContigSet by DNA length
+     * Method for BasicSearch of one sequence against many sequences 
+     * **
+     * **    overloading as follows:
+     * **        input_one_id: SingleEndLibrary, FeatureSet
+     * **        input_many_id: SingleEndLibrary, FeatureSet, Genome, GenomeSet
+     * **        output_id: SingleEndLibrary (if input_many is SELib), FeatureSet
      * </pre>
-     * @param   params   instance of type {@link us.kbase.kbvsearch.FilterContigsParams FilterContigsParams}
-     * @return   instance of type {@link us.kbase.kbvsearch.FilterContigsResults FilterContigsResults}
+     * @param   params   instance of type {@link us.kbase.kbvsearch.VSearchBasicSearchParams VSearchBasicSearchParams} (original type "VSearch_BasicSearch_Params")
+     * @return   instance of type {@link us.kbase.kbvsearch.VSearchBasicSearchOutput VSearchBasicSearchOutput} (original type "VSearch_BasicSearch_Output")
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public FilterContigsResults filterContigs(FilterContigsParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+    public VSearchBasicSearchOutput vSearchBasicSearch(VSearchBasicSearchParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
-        TypeReference<List<FilterContigsResults>> retType = new TypeReference<List<FilterContigsResults>>() {};
-        List<FilterContigsResults> res = caller.jsonrpcCall("kb_vsearch.filter_contigs", args, retType, true, true, jsonRpcContext);
+        TypeReference<List<VSearchBasicSearchOutput>> retType = new TypeReference<List<VSearchBasicSearchOutput>>() {};
+        List<VSearchBasicSearchOutput> res = caller.jsonrpcCall("kb_vsearch.VSearch_BasicSearch", args, retType, true, true, jsonRpcContext);
         return res.get(0);
     }
 }

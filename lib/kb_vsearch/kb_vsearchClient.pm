@@ -127,7 +127,7 @@ sub new
 $params is a kb_vsearch.VSearch_BasicSearch_Params
 $return is a kb_vsearch.VSearch_BasicSearch_Output
 VSearch_BasicSearch_Params is a reference to a hash where the following keys are defined:
-	workspace_id has a value which is a kb_vsearch.workspace_id
+	workspace_name has a value which is a kb_vsearch.workspace_name
 	input_one_name has a value which is a kb_vsearch.one_name
 	input_many_name has a value which is a kb_vsearch.many_name
 	output_filtered_name has a value which is a kb_vsearch.output_name
@@ -137,18 +137,18 @@ VSearch_BasicSearch_Params is a reference to a hash where the following keys are
 	minwordmatches has a value which is an int
 	ident_thresh has a value which is a float
 	ident_mode has a value which is an int
-workspace_id is a string
+workspace_name is a string
 one_name is a string
 many_name is a string
 output_name is a string
 VSearch_BasicSearch_Output is a reference to a hash where the following keys are defined:
-	output_report_id has a value which is a kb_vsearch.report_id
+	output_report_name has a value which is a kb_vsearch.report_name
 	output_report_ref has a value which is a kb_vsearch.report_ref
 	output_filtered_ref has a value which is a kb_vsearch.output_ref
 	n_initial_seqs has a value which is an int
 	n_seqs_matched has a value which is an int
 	n_seqs_notmatched has a value which is an int
-report_id is a string
+report_name is a string
 report_ref is a string
 output_ref is a string
 
@@ -161,7 +161,7 @@ output_ref is a string
 $params is a kb_vsearch.VSearch_BasicSearch_Params
 $return is a kb_vsearch.VSearch_BasicSearch_Output
 VSearch_BasicSearch_Params is a reference to a hash where the following keys are defined:
-	workspace_id has a value which is a kb_vsearch.workspace_id
+	workspace_name has a value which is a kb_vsearch.workspace_name
 	input_one_name has a value which is a kb_vsearch.one_name
 	input_many_name has a value which is a kb_vsearch.many_name
 	output_filtered_name has a value which is a kb_vsearch.output_name
@@ -171,18 +171,18 @@ VSearch_BasicSearch_Params is a reference to a hash where the following keys are
 	minwordmatches has a value which is an int
 	ident_thresh has a value which is a float
 	ident_mode has a value which is an int
-workspace_id is a string
+workspace_name is a string
 one_name is a string
 many_name is a string
 output_name is a string
 VSearch_BasicSearch_Output is a reference to a hash where the following keys are defined:
-	output_report_id has a value which is a kb_vsearch.report_id
+	output_report_name has a value which is a kb_vsearch.report_name
 	output_report_ref has a value which is a kb_vsearch.report_ref
 	output_filtered_ref has a value which is a kb_vsearch.output_ref
 	n_initial_seqs has a value which is an int
 	n_seqs_matched has a value which is an int
 	n_seqs_notmatched has a value which is an int
-report_id is a string
+report_name is a string
 report_ref is a string
 output_ref is a string
 
@@ -306,7 +306,7 @@ sub _validate_version {
 
 
 
-=head2 workspace_id
+=head2 workspace_name
 
 =over 4
 
@@ -447,7 +447,7 @@ a string
 
 
 
-=head2 report_id
+=head2 report_name
 
 =over 4
 
@@ -516,7 +516,7 @@ VSearch BasicSearch Input Params
 
 <pre>
 a reference to a hash where the following keys are defined:
-workspace_id has a value which is a kb_vsearch.workspace_id
+workspace_name has a value which is a kb_vsearch.workspace_name
 input_one_name has a value which is a kb_vsearch.one_name
 input_many_name has a value which is a kb_vsearch.many_name
 output_filtered_name has a value which is a kb_vsearch.output_name
@@ -534,7 +534,7 @@ ident_mode has a value which is an int
 =begin text
 
 a reference to a hash where the following keys are defined:
-workspace_id has a value which is a kb_vsearch.workspace_id
+workspace_name has a value which is a kb_vsearch.workspace_name
 input_one_name has a value which is a kb_vsearch.one_name
 input_many_name has a value which is a kb_vsearch.many_name
 output_filtered_name has a value which is a kb_vsearch.output_name
@@ -569,7 +569,7 @@ VSearch BasicSearch Output
 
 <pre>
 a reference to a hash where the following keys are defined:
-output_report_id has a value which is a kb_vsearch.report_id
+output_report_name has a value which is a kb_vsearch.report_name
 output_report_ref has a value which is a kb_vsearch.report_ref
 output_filtered_ref has a value which is a kb_vsearch.output_ref
 n_initial_seqs has a value which is an int
@@ -583,7 +583,7 @@ n_seqs_notmatched has a value which is an int
 =begin text
 
 a reference to a hash where the following keys are defined:
-output_report_id has a value which is a kb_vsearch.report_id
+output_report_name has a value which is a kb_vsearch.report_name
 output_report_ref has a value which is a kb_vsearch.report_ref
 output_filtered_ref has a value which is a kb_vsearch.output_ref
 n_initial_seqs has a value which is an int
