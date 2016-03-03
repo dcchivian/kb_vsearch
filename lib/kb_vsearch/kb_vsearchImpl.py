@@ -10,12 +10,14 @@ import traceback
 import uuid
 from datetime import datetime
 from pprint import pprint, pformat
-
 import numpy as np
+import gzip
 
 from Bio import SeqIO
-
 from biokbase.workspace.client import Workspace as workspaceService
+from requests_toolbelt import MultipartEncoder  # added
+from biokbase.AbstractHandle.Client import AbstractHandle as HandleService  # added
+
 #END_HEADER
 
 
@@ -65,13 +67,13 @@ class kb_vsearch:
     def get_genome_set_feature_seqs(self, ws_data, ws_info):
         pass
 
-    #END_CLASS_HEADER
-
     # config contains contents of config file in a hash or None if it couldn't
     # be found
     def __init__(self, config):
         #BEGIN_CONSTRUCTOR
         self.workspaceURL = config['workspace-url']
+        self.shockURL = config['shock-url']
+        self.handleURL = config['handle-service-url']
         self.scratch = os.path.abspath(config['scratch'])
         # HACK!! temporary hack for issue where megahit fails on mac because of silent named pipe error
         #self.host_scratch = self.scratch
@@ -82,6 +84,108 @@ class kb_vsearch:
 
         #END_CONSTRUCTOR
         pass
+
+
+    # Helper script borrowed from the transform service, logger removed
+    #
+    def upload_file_to_shock(self,
+                             shock_service_url = None,
+                             filePath = None,
+                             ssl_verify = True,
+                             token = None):
+        """
+        Use HTTP multi-part POST to save a file to a SHOCK instance.
+        """
+
+        if token is None:
+            raise Exception("Authentication token required!")
+
+        #build the header
+        header = dict()
+        header["Authorization"] = "Oauth {0}".format(token)
+        if filePath is None:
+            raise Exception("No file given for upload to SHOCK!")
+
+        dataFile = open(os.path.abspath(filePath), 'rb')
+        m = MultipartEncoder(fields={'upload': (os.path.split(filePath)[-1], dataFile)})
+        header['Content-Type'] = m.content_type
+
+        #logger.info("Sending {0} to {1}".format(filePath,shock_service_url))
+        try:
+            response = requests.post(shock_service_url + "/node", headers=header, data=m, allow_redirects=True, verify=ssl_verify)
+            dataFile.close()
+        except:
+            dataFile.close()
+            raise
+        if not response.ok:
+            response.raise_for_status()
+        result = response.json()
+        if result['error']:
+            raise Exception(result['error'][0])
+        else:
+            return result["data"]
+
+
+    def upload_SingleEndLibrary_to_shock_and_ws (self,
+                                                 ctx,
+                                                 workspace_name,
+                                                 obj_name,
+                                                 file_path,
+                                                 provenance,
+                                                 sequencing_tech):
+        # 1) upload files to shock
+        token = ctx['token']
+        forward_shock_file = self.upload_file_to_shock(
+            shock_service_url = self.shockURL,
+            filePath = file_path,
+            token = token
+            )
+        #pprint(forward_shock_file)
+
+        # 2) create handle
+        hs = HandleService(url=self.handleURL, token=token)
+        forward_handle = hs.persist_handle({
+                                        'id' : forward_shock_file['id'], 
+                                        'type' : 'shock',
+                                        'url' : self.shockURL,
+                                        'file_name': forward_shock_file['file']['name'],
+                                        'remote_md5': forward_shock_file['file']['checksum']['md5']})
+
+        
+        # 3) save to WS
+        single_end_library = {
+            'lib': {
+                'file': {
+                    'hid':forward_handle,
+                    'file_name': forward_shock_file['file']['name'],
+                    'id': forward_shock_file['id'],
+                    'url': self.shockURL,
+                    'type':'shock',
+                    'remote_md5':forward_shock_file['file']['checksum']['md5']
+                },
+                'encoding':'UTF8',
+                'type':'fasta',
+                'size':forward_shock_file['file']['size']
+            },
+            'sequencing_tech':sequencing_tech
+        }
+        ws = workspaceService(self.workspaceURL, token=ctx['token'])
+        new_obj_info = ws.save_objects({
+                        'workspace':workspace_name,
+                        'objects':[
+                            {
+                                'type':'KBaseFile.SingleEndLibrary',
+                                'data':single_end_library,
+                                'name':obj_name,
+                                'meta':{},
+                                'provenance':provenance
+                            }]
+                        })
+        return new_obj_info[0]
+
+    #END_CLASS_HEADER
+
+
 
     def VSearch_BasicSearch(self, ctx, params):
         # ctx is the context object
@@ -151,23 +255,23 @@ class kb_vsearch:
                 #    reverse_reads={}
 
                 ### NOTE: this section is what could be replaced by the transform services
-                one_forward_reads_file_location = os.path.join(self.scratch,one_forward_reads['file_name'])
-                one_forward_reads_file = open(one_forward_reads_file_location, 'w', 0)
-                self.log(console, 'downloading reads file: '+str(one_forward_reads_file_location))
+                one_forward_reads_file_path = os.path.join(self.scratch,one_forward_reads['file_name'])
+                one_forward_reads_file_handle = open(one_forward_reads_file_path, 'w', 0)
+                self.log(console, 'downloading reads file: '+str(one_forward_reads_file_path))
                 headers = {'Authorization': 'OAuth '+ctx['token']}
                 r = requests.get(one_forward_reads['url']+'/node/'+one_forward_reads['id']+'?download', stream=True, headers=headers)
                 for chunk in r.iter_content(1024):
-                    one_forward_reads_file.write(chunk)
-                one_forward_reads_file.close();
+                    one_forward_reads_file_handle.write(chunk)
+                one_forward_reads_file_handle.close();
                 self.log(console, 'done')
                 ### END NOTE
 
                 #if 'interleaved' in data and data['interleaved']:
                 #    self.log(console, 'extracting forward/reverse reads into separate files')
                 #    if re.search('gz', forward_reads['file_name'], re.I):
-                #        bcmdstring = 'gunzip -c ' + forward_reads_file_location
+                #        bcmdstring = 'gunzip -c ' + forward_reads_file_path
                 #    else:    
-                #        bcmdstring = 'cat ' + forward_reads_file_location 
+                #        bcmdstring = 'cat ' + forward_reads_file_path 
                 # 
                 #    cmdstring = bcmdstring + '| (paste - - - - - - - -  | tee >(cut -f 1-4 | tr "\t" "\n" > '+self.scratch+'/forward.fastq) | cut -f 5-8 | tr "\t" "\n" > '+self.scratch+'/reverse.fastq )'
                 #    cmdProcess = subprocess.Popen(cmdstring, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, executable='/bin/bash')
@@ -179,13 +283,13 @@ class kb_vsearch:
                 #    reverse_reads['file_name']='reverse.fastq'
                 #else:
                 #    ### NOTE: this section is what could also be replaced by the transform services
-                #    reverse_reads_file_location = os.path.join(self.scratch,reverse_reads['file_name'])
-                #    reverse_reads_file = open(reverse_reads_file_location, 'w', 0)
-                #    self.log(console, 'downloading reverse reads file: '+str(reverse_reads_file_location))
+                #    reverse_reads_file_path = os.path.join(self.scratch,reverse_reads['file_name'])
+                #    reverse_reads_file_handle = open(reverse_reads_file_path, 'w', 0)
+                #    self.log(console, 'downloading reverse reads file: '+str(reverse_reads_file_path))
                 #    r = requests.get(reverse_reads['url']+'/node/'+reverse_reads['id']+'?download', stream=True, headers=headers)
                 #    for chunk in r.iter_content(1024):
-                #        reverse_reads_file.write(chunk)
-                #    reverse_reads_file.close()
+                #        reverse_reads_file_handle.write(chunk)
+                #    reverse_reads_file_handle.close()
                 #    self.log(console, 'done')
                 #    ### END NOTE
             except Exception as e:
@@ -201,12 +305,19 @@ class kb_vsearch:
 
         #### Get the input_many object
         ##
+        many_forward_reads_file_compression = None
+        sequencing_tech = 'artificial reads'
         try:
             ws = workspaceService(self.workspaceURL, token=ctx['token'])
             objects = ws.get_objects([{'ref': params['workspace_name']+'/'+params['input_many_name']}])
             data = objects[0]['data']
             info = objects[0]['info']
             many_type_name = info[2].split('.')[1].split('-')[0]
+            if data['lib']['file']['file_name'][-3:] == ".gz":
+                many_forward_reads_file_compression = 'gz'
+            if 'sequencing_tech' in data:
+                sequencing_tech = data['sequencing_tech']
+
         except Exception as e:
             raise ValueError('Unable to fetch input_many_name object from workspace: ' + str(e))
             #to get the full stack trace: traceback.format_exc()
@@ -216,6 +327,11 @@ class kb_vsearch:
         #  Note: currently only support SingleEndLibrary
         #
         if many_type_name == 'SingleEndLibrary':
+
+            # DEBUG
+            #for k in data:
+            #    self.log(console,"SingleEndLibrary ["+k+"]: "+str(data[k]))
+
             try:
                 if 'lib' in data:
                     many_forward_reads = data['lib']['file']
@@ -232,14 +348,14 @@ class kb_vsearch:
                 #    reverse_reads={}
 
                 ### NOTE: this section is what could be replaced by the transform services
-                many_forward_reads_file_location = os.path.join(self.scratch,many_forward_reads['file_name'])
-                many_forward_reads_file = open(many_forward_reads_file_location, 'w', 0)
-                self.log(console, 'downloading reads file: '+str(many_forward_reads_file_location))
+                many_forward_reads_file_path = os.path.join(self.scratch,many_forward_reads['file_name'])
+                many_forward_reads_file_handle = open(many_forward_reads_file_path, 'w', 0)
+                self.log(console, 'downloading reads file: '+str(many_forward_reads_file_path))
                 headers = {'Authorization': 'OAuth '+ctx['token']}
                 r = requests.get(many_forward_reads['url']+'/node/'+many_forward_reads['id']+'?download', stream=True, headers=headers)
                 for chunk in r.iter_content(1024):
-                    many_forward_reads_file.write(chunk)
-                many_forward_reads_file.close();
+                    many_forward_reads_file_handle.write(chunk)
+                many_forward_reads_file_handle.close();
                 self.log(console, 'done')
                 ### END NOTE
             except Exception as e:
@@ -265,26 +381,26 @@ class kb_vsearch:
         # check for necessary files
         if not os.path.isfile(self.VSEARCH):
             raise ValueError("no such file '"+self.VSEARCH+"'")
-        if not os.path.isfile(one_forward_reads_file_location):
-            raise ValueError("no such file '"+one_forward_reads_file_location+"'")
-        if not os.path.isfile(many_forward_reads_file_location):
-            raise ValueError("no such file '"+many_forward_reads_file_location+"'")
+        if not os.path.isfile(one_forward_reads_file_path):
+            raise ValueError("no such file '"+one_forward_reads_file_path+"'")
+        if not os.path.isfile(many_forward_reads_file_path):
+            raise ValueError("no such file '"+many_forward_reads_file_path+"'")
 
-        # set the output location
+        # set the output path
         timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
         output_dir = os.path.join(self.scratch,'output.'+str(timestamp))
-        output_aln_file = os.path.join(output_dir, 'alnout.txt');
-        output_filter_fasta_file = os.path.join(output_dir, 'output_filtered.fna');
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        output_aln_file_path = os.path.join(output_dir, 'alnout.txt');
+        output_filtered_fasta_file_path = os.path.join(output_dir, 'output_filtered.fna');
 
         # this is command for basic search mode
         vsearch_cmd.append('--usearch_global')
-#        vsearch_cmd.append(many_forward_reads['file_name'])
-        vsearch_cmd.append(many_forward_reads_file_location)
+        vsearch_cmd.append(many_forward_reads_file_path)
         vsearch_cmd.append('--db')
-#        vsearch_cmd.append(one_forward_reads['file_name'])
-        vsearch_cmd.append(one_forward_reads_file_location)
+        vsearch_cmd.append(one_forward_reads_file_path)
         vsearch_cmd.append('--alnout')
-        vsearch_cmd.append(output_aln_file)
+        vsearch_cmd.append(output_aln_file_path)
 
         # options
         if 'maxaccepts' in params:
@@ -345,19 +461,24 @@ class kb_vsearch:
         #
         self.log(console, 'parsing vsearch alignment output')
         hit_seq_ids = dict()
-        output_aln_filehandle = open (output_aln_file, "r", 0)
-        output_aln_buf = output_aln_filehandle.readlines()
-        output_aln_filehandle.close()
+        output_aln_file_handle = open (output_aln_file_path, "r", 0)
+        output_aln_buf = output_aln_file_handle.readlines()
+        output_aln_file_handle.close()
         hit_total = 0
         for line in output_aln_buf:
             # hits have lines of format 'Query >1367929'
             if line.startswith('Query >'):
+                #self.log(console,'HIT LINE: '+line)  # DEBUG
                 hit_total += 1
                 hit_seq_id = line[7:]  # removes leading '>'
-                hit_seq_id = hit_seq_id[0:hit_seq_id.find("\n")]
-                hit_seq_id = hit_seq_id[0:hit_seq_id.find("\t")]
-                hit_seq_id = hit_seq_id[0:hit_seq_id.find(" ")]
-                hit_seq_ids['hit_seq_id'] = True
+                if "\n" in hit_seq_id:
+                    hit_seq_id = hit_seq_id[0:hit_seq_id.find("\n")+1]
+                if "\t" in hit_seq_id:
+                    hit_seq_id = hit_seq_id[0:hit_seq_id.find("\t")+1]
+                if " " in hit_seq_id:
+                    hit_seq_id = hit_seq_id[0:hit_seq_id.find(" ")+1]
+                hit_seq_ids[hit_seq_id] = True
+                self.log(console, 'HIT: '+hit_seq_id)  # DEBUG
         
 
         # Filter many set and make filtered output file
@@ -367,43 +488,69 @@ class kb_vsearch:
         self.log(console, 'filtering many sequences')
 
         if many_type_name == 'SingleEndLibrary':
-            with open(many_forward_reads_file, 'r', -1) as many_forward_reads_filehandle, open(output_filter_fasta_file, 'w', -1) as output_filter_fasta_filehandle:
-                seq_total = 0;
+            
+#            with open(many_forward_reads_file_path, 'r', -1) as many_forward_reads_file_handle, open(output_filtered_fasta_file_path, 'w', -1) as output_filtered_fasta_file_handle:
+            output_filtered_fasta_file_handle = open(output_filtered_fasta_file_path, 'w', -1)
+            if many_forward_reads_file_compression == 'gz':
+                many_forward_reads_file_handle = gzip.open(many_forward_reads_file_path, 'r', -1)
+            else:
+                many_forward_reads_file_handle = open(many_forward_reads_file_path, 'r', -1)
+
+                
+            seq_total = 0;
+            filtered_seq_total = 0
+            last_seq_buf = []
+            last_seq_id = None
+            last_header = None
+            for line in many_forward_reads_file_handle:
+                if line.startswith('>'):
+                    #self.log(console, 'LINE: '+line)  # DEBUG
+                    seq_total += 1
+                    seq_id = line[1:]
+                    if "\n" in seq_id:
+                        seq_id = seq_id[0:seq_id.find("\n")+1]
+                    if "\t" in seq_id:
+                        seq_id = seq_id[0:seq_id.find("\t")+1]
+                    if " " in seq_id:
+                        seq_id = seq_id[0:seq_id.find(" ")+1]
+                    
+                    if last_seq_id != None:
+                        #self.log(console, 'ID: '+last_seq_id)  # DEBUG
+                        try:
+                            in_filtered_set = hit_seq_ids[last_seq_id]
+                            #self.log(console, 'HIT')  # DEBUG
+                            filtered_seq_total += 1
+                            output_filtered_fasta_file_handle.write(last_header)
+                            output_filtered_fasta_file_handle.writelines(last_seq_buf)
+                        except:
+                            pass
+                        
+                    last_seq_buf = []
+                    last_seq_id = seq_id
+                    last_header = line
+                else:
+                    last_seq_buf.append(line)
+            if last_seq_id != None:
+                #self.log(console, 'ID: '+last_seq_id)  # DEBUG
+                try:
+                    in_filtered_set = hit_seq_ids[last_seq_id]
+                    #self.log(console, 'HIT')  # DEBUG
+                    filtered_seq_total += 1
+                    output_filtered_fasta_file_handle.write(last_header)
+                    output_filtered_fasta_file_handle.writelines(last_seq_buf)
+                except:
+                    pass
+                
                 last_seq_buf = []
                 last_seq_id = None
                 last_header = None
-                for line in many_forward_reads_filehandle:
-                    if line.startswith('>'):
-                        seq_total += 1
-                        seq_id = line[1:]
-                        seq_id = seq_id[0:seq_id.find("\n")]
-                        seq_id = seq_id[0:seq_id.find("\t")]
-                        seq_id = seq_id[0:seq_id.find(" ")]
-                        
-                        if last_seq_id != None:
-                            try:
-                                in_filtered_set = hit_seq_ids[last_seq_id]
-                                output_filter_fasta_filehandle.write(last_header)
-                                output_filter_fasta_filehandle.writelines(last_seq_buf)
-                            except:
-                                pass
-                            
-                        last_seq_buf = []
-                        last_seq_id = seq_id
-                        last_header = line
-                    else:
-                        last_seq_buf.append(line)
-                if last_seq_id != None:
-                    try:
-                        in_filtered_set = hit_seq_ids[last_seq_id]
-                        output_filter_fasta_filehandle.write(last_header)
-                        output_filter_fasta_filehandle.writelines(last_seq_buf)
-                    except:
-                        pass
 
-                    last_seq_buf = []
-                    last_seq_id = None
-                    last_header = None
+            many_forward_reads_file_handle.close()
+            output_filtered_fasta_file_handle.close()
+
+        if filtered_seq_total != hit_total:
+            raise ValueError('hits in VSearch alignment output '+str(hit_total)+' != '+str(filtered_seq_total)+' matched sequences in input file')
+
 
         #elif many_type_name == 'FeatureSet' \
         #    or many_type_name == 'Genome' \
@@ -441,33 +588,29 @@ class kb_vsearch:
         if 'provenance' in ctx:
             provenance = ctx['provenance']
         # add additional info to provenance here, in this case the input data object reference
-        provenance[0]['input_ws_objects']=[params['workspace_name']+'/'+params['input_many_name']]
+        provenance[0]['input_ws_objects'] = []
+        provenance[0]['input_ws_objects'].append(params['workspace_name']+'/'+params['input_one_name'])
+        provenance[0]['input_ws_objects'].append(params['workspace_name']+'/'+params['input_many_name'])
+        provenance[0]['service'] = 'kb_vsearch'
+        provenance[0]['method'] = 'VSearch_BasicSearch'
 
 
         # upload reads
         #
-        cmdstring = " ".join( ('ws-tools fastX2reads',
-                               '--inputfile', output_filter_fasta_file,
-                               '--wsurl', self.workspaceURL,
-                               '--shockurl', self.shockURL,
-                               '--outws', params['output_ws'],
-                               '--outobj', params['output_read_library'],
-                               '--readcount', readcount,
-                               '--token', token
-                               ) )
-        
-        cmdProcess = subprocess.Popen(cmdstring, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        stdout, stderr = cmdProcess.communicate()
-        report += "cmdstring: " + cmdstring + " stdout: " + stdout + " stderr: " + stderr
-
-
+        self.upload_SingleEndLibrary_to_shock_and_ws (ctx,
+                                                      params['workspace_name'],,
+                                                      params['output_filtered_name'],
+                                                      output_filtered_fasta_file_path,
+                                                      provenance,
+                                                      sequencing_tech
+                                                     )
         # build output report object
         #
-        report += 'sequences in many set: '+seq_total
-        report += 'sequences in hit set:  '+hit_total
+        report += 'sequences in many set: '+str(seq_total)
+        report += 'sequences in hit set:  '+str(hit_total)
 
         reportObj = {
-            'objects_created':[{'ref':params['workspace_name']+'/'+params['output_filtered_reads'], 'description':'SingleEndLibrary VSearch_BasicSearch hits'}],
+            'objects_created':[{'ref':params['workspace_name']+'/'+params['output_filtered_name'], 'description':'SingleEndLibrary VSearch_BasicSearch hits'}],
             'text_message':report
         }
 
@@ -488,7 +631,7 @@ class kb_vsearch:
 
         returnVal = { 'output_report_name': reportName,
                       'output_report_ref': str(report_obj_info[6]) + '/' + str(report_obj_info[0]) + '/' + str(report_obj_info[4]),
-                      'output_filtered_ref': params['workspace_name']+'/'+params['output_filtered_reads']
+                      'output_filtered_ref': params['workspace_name']+'/'+params['output_filtered_name']
                       }
 
         #END VSearch_BasicSearch
