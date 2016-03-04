@@ -304,7 +304,8 @@ class kb_vsearch:
 
         #### Get the input_many object
         ##
-        many_forward_reads_file_compression = None
+#        many_forward_reads_file_compression = None
+        many_forward_reads_file_compression = 'gz'
         #sequencing_tech = 'artificial reads'
         try:
             ws = workspaceService(self.workspaceURL, token=ctx['token'])
@@ -312,8 +313,8 @@ class kb_vsearch:
             data = objects[0]['data']
             info = objects[0]['info']
             many_type_name = info[2].split('.')[1].split('-')[0]
-            if data['lib']['file']['file_name'][-3:] == ".gz":
-                many_forward_reads_file_compression = 'gz'
+#            if data['lib']['file']['file_name'][-3:] == ".gz":
+#                many_forward_reads_file_compression = 'gz'
             #if 'sequencing_tech' in data:
             #    sequencing_tech = data['sequencing_tech']
 
