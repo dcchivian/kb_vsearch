@@ -129,6 +129,7 @@ class kb_vsearch:
 
     def upload_SingleEndLibrary_to_shock_and_ws (self,
                                                  ctx,
+                                                 console,  # DEBUG
                                                  workspace_name,
                                                  obj_name,
                                                  file_path,
@@ -611,7 +612,8 @@ class kb_vsearch:
         # upload reads
         #
         self.log(console,"UPLOADING RESULTS")  # DEBUG
-        self.upload_SingleEndLibrary_to_shock_and_ws (ctx,
+        self.upload_SingleEndLibrary_to_shock_and_ws (ctx,,
+                                                      console,  # DEBUG
                                                       params['workspace_name'],
                                                       params['output_filtered_name'],
                                                       output_filtered_fasta_file_path,
