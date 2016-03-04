@@ -526,7 +526,7 @@ class kb_vsearch:
                         #self.log(console, 'ID: '+last_seq_id)  # DEBUG
                         try:
                             in_filtered_set = hit_seq_ids[last_seq_id]
-                            #self.log(console, 'HIT')  # DEBUG
+                            self.log(console, 'FOUND HIT '+last_seq_id)  # DEBUG
                             filtered_seq_total += 1
                             output_filtered_fasta_file_handle.write(last_header)
                             output_filtered_fasta_file_handle.writelines(last_seq_buf)
@@ -542,7 +542,7 @@ class kb_vsearch:
                 #self.log(console, 'ID: '+last_seq_id)  # DEBUG
                 try:
                     in_filtered_set = hit_seq_ids[last_seq_id]
-                    #self.log(console, 'HIT')  # DEBUG
+                    self.log(console, 'FOUND HIT: '+last_seq_id)  # DEBUG
                     filtered_seq_total += 1
                     output_filtered_fasta_file_handle.write(last_header)
                     output_filtered_fasta_file_handle.writelines(last_seq_buf)
@@ -557,6 +557,7 @@ class kb_vsearch:
             output_filtered_fasta_file_handle.close()
 
         if filtered_seq_total != hit_total:
+            self.log(console,'hits in VSearch alignment output '+str(hit_total)+' != '+str(filtered_seq_total)+' matched sequences in input file')
             raise ValueError('hits in VSearch alignment output '+str(hit_total)+' != '+str(filtered_seq_total)+' matched sequences in input file')
 
 
