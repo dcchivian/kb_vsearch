@@ -52,7 +52,7 @@
             "default_values": [ "0.97" ],
             "field_type": "text",
             "text_options": {
-                "validate_as": "int",
+                "validate_as": "float",
                 "min_integer" : 0
             }
         },
@@ -74,7 +74,7 @@
             "optional": true,
             "advanced": true,
             "allow_multiple": false,
-            "default_values": [ "10000000000" ],
+            "default_values": [ "1000000" ],
             "field_type": "text",
             "text_options": {
                 "validate_as": "int",
