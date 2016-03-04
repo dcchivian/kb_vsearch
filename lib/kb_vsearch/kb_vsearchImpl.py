@@ -304,8 +304,7 @@ class kb_vsearch:
 
         #### Get the input_many object
         ##
-#        many_forward_reads_file_compression = None
-        many_forward_reads_file_compression = 'gz'
+        many_forward_reads_file_compression = None
         #sequencing_tech = 'artificial reads'
         try:
             ws = workspaceService(self.workspaceURL, token=ctx['token'])
@@ -313,13 +312,17 @@ class kb_vsearch:
             data = objects[0]['data']
             info = objects[0]['info']
             many_type_name = info[2].split('.')[1].split('-')[0]
-            if 'lib' in data and \
-                    'file' in data['lib'] and \
-                    'file_name' in data['lib']['file']:
+
+            many_type_namespace = info[2].split('.')[0]
+            if many_type_namespace == 'KBaseAssembly':
+                file_name = data['handle']['file_name']
+            elif many_type_namespace == 'KBaseFile':
                 file_name = data['lib']['file']['file_name']
-                self.log(console, 'INPUT_MANY_FILENAME: '+file_name)
-#                if file_name[-3:] == ".gz":
-#                    many_forward_reads_file_compression = 'gz'
+            else:
+                raise ValueError('bad data type namespace: '+many_type_namespace)
+            self.log(console, 'INPUT_MANY_FILENAME: '+file_name)  # DEBUG
+            if file_name[-3:] == ".gz":
+                many_forward_reads_file_compression = 'gz'
             #if 'sequencing_tech' in data:
             #    sequencing_tech = data['sequencing_tech']
 
