@@ -89,6 +89,7 @@ class kb_vsearch:
     # Helper script borrowed from the transform service, logger removed
     #
     def upload_file_to_shock(self,
+                             console,  # DEBUG
                              shock_service_url = None,
                              filePath = None,
                              ssl_verify = True,
@@ -96,7 +97,7 @@ class kb_vsearch:
         """
         Use HTTP multi-part POST to save a file to a SHOCK instance.
         """
-        self.log(console,"UPLOADING FILE TO SHOCK")
+        self.log(console,"UPLOADING FILE "+filePath+" TO SHOCK")
 
         if token is None:
             raise Exception("Authentication token required!")
@@ -135,18 +136,21 @@ class kb_vsearch:
                                                  file_path,
                                                  provenance):
 
-        self.log(console,'UPLOADING FILE '+file_path+'TO '+workspace_name+'/'+obj_name)
+        self.log(console,'UPLOADING FILE '+file_path+' TO '+workspace_name+'/'+obj_name)
 
         # 1) upload files to shock
         token = ctx['token']
         forward_shock_file = self.upload_file_to_shock(
+            console,  # DEBUG
             shock_service_url = self.shockURL,
             filePath = file_path,
             token = token
             )
         #pprint(forward_shock_file)
+        self.log(console,'SHOCK UPLOAD DONE')
 
         # 2) create handle
+        self.log(console,'GETTING HANDLE')
         hs = HandleService(url=self.handleURL, token=token)
         forward_handle = hs.persist_handle({
                                         'id' : forward_shock_file['id'], 
@@ -157,6 +161,7 @@ class kb_vsearch:
 
         
         # 3) save to WS
+        self.log(console,'SAVING TO WORKSPACE')
         single_end_library = {
             'lib': {
                 'file': {
@@ -172,7 +177,9 @@ class kb_vsearch:
                 'size':forward_shock_file['file']['size']
             },
         }
+        self.log(console,'GETTING WORKSPACE SERVICE OBJECT')
         ws = workspaceService(self.workspaceURL, token=ctx['token'])
+        self.log(console,'SAVE OPERATION...')
         new_obj_info = ws.save_objects({
                         'workspace':workspace_name,
                         'objects':[
@@ -184,6 +191,8 @@ class kb_vsearch:
                                 'provenance':provenance
                             }]
                         })
+        self.log(console,'SAVED TO WORKSPACE')
+
         return new_obj_info[0]
 
     #END_CLASS_HEADER
