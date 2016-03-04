@@ -96,6 +96,7 @@ class kb_vsearch:
         """
         Use HTTP multi-part POST to save a file to a SHOCK instance.
         """
+        self.log(console,"UPLOADING FILE TO SHOCK")
 
         if token is None:
             raise Exception("Authentication token required!")
@@ -132,6 +133,8 @@ class kb_vsearch:
                                                  obj_name,
                                                  file_path,
                                                  provenance):
+
+        self.log(console,'UPLOADING FILE '+file_path+'TO '+workspace_name+'/'+obj_name)
 
         # 1) upload files to shock
         token = ctx['token']
@@ -439,7 +442,7 @@ class kb_vsearch:
 
         # Run VSEARCH, capture output as it happens
         #
-        self.log(console, 'running vsearch:')
+        self.log(console, 'RUNNING VSEARCH:')
         self.log(console, '    '+' '.join(vsearch_cmd))
         report += "\n"+'running vsearch:'+"\n"
         report += '    '+' '.join(vsearch_cmd)+"\n"
@@ -467,7 +470,7 @@ class kb_vsearch:
         #
         # Valign calls hits "Query" (as strange as that is)
         #
-        self.log(console, 'parsing vsearch alignment output')
+        self.log(console, 'PARSING VSEARCH ALIGNMENT OUTPUT')
         hit_seq_ids = dict()
         output_aln_file_handle = open (output_aln_file_path, "r", 0)
         output_aln_buf = output_aln_file_handle.readlines()
@@ -493,7 +496,7 @@ class kb_vsearch:
         #
         #  Note: don't use SeqIO.parse because loads everything into memory
         #
-        self.log(console, 'filtering many sequences')
+        self.log(console, 'FILTERING OUT HITS')
 
         if many_type_name == 'SingleEndLibrary':
             
@@ -526,7 +529,7 @@ class kb_vsearch:
                         #self.log(console, 'ID: '+last_seq_id)  # DEBUG
                         try:
                             in_filtered_set = hit_seq_ids[last_seq_id]
-                            self.log(console, 'FOUND HIT '+last_seq_id)  # DEBUG
+                            #self.log(console, 'FOUND HIT '+last_seq_id)  # DEBUG
                             filtered_seq_total += 1
                             output_filtered_fasta_file_handle.write(last_header)
                             output_filtered_fasta_file_handle.writelines(last_seq_buf)
@@ -542,7 +545,7 @@ class kb_vsearch:
                 #self.log(console, 'ID: '+last_seq_id)  # DEBUG
                 try:
                     in_filtered_set = hit_seq_ids[last_seq_id]
-                    self.log(console, 'FOUND HIT: '+last_seq_id)  # DEBUG
+                    #self.log(console, 'FOUND HIT: '+last_seq_id)  # DEBUG
                     filtered_seq_total += 1
                     output_filtered_fasta_file_handle.write(last_header)
                     output_filtered_fasta_file_handle.writelines(last_seq_buf)
@@ -593,6 +596,7 @@ class kb_vsearch:
         """
 
         # load the method provenance from the context object
+        self.log(console,"SETTING PROVENANCE")  # DEBUG
         provenance = [{}]
         if 'provenance' in ctx:
             provenance = ctx['provenance']
@@ -606,6 +610,7 @@ class kb_vsearch:
 
         # upload reads
         #
+        self.log(console,"UPLOADING RESULTS")  # DEBUG
         self.upload_SingleEndLibrary_to_shock_and_ws (ctx,
                                                       params['workspace_name'],
                                                       params['output_filtered_name'],
@@ -615,6 +620,7 @@ class kb_vsearch:
                                                      )
         # build output report object
         #
+        self.log(console,"BUILDING REPORT")  # DEBUG
         report += 'sequences in many set: '+str(seq_total)
         report += 'sequences in hit set:  '+str(hit_total)
 
@@ -638,10 +644,12 @@ class kb_vsearch:
                 ]
             })[0]
 
+        self.log(console,"BUILDING RETURN OBJECT")
         returnVal = { 'output_report_name': reportName,
                       'output_report_ref': str(report_obj_info[6]) + '/' + str(report_obj_info[0]) + '/' + str(report_obj_info[4]),
                       'output_filtered_ref': params['workspace_name']+'/'+params['output_filtered_name']
                       }
+        self.log(console,"VSearch_BasicSearch DONE")
 
         #END VSearch_BasicSearch
 
