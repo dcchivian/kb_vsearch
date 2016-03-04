@@ -131,8 +131,8 @@ class kb_vsearch:
                                                  workspace_name,
                                                  obj_name,
                                                  file_path,
-                                                 provenance,
-                                                 sequencing_tech):
+                                                 provenance):
+
         # 1) upload files to shock
         token = ctx['token']
         forward_shock_file = self.upload_file_to_shock(
@@ -167,14 +167,13 @@ class kb_vsearch:
                 'type':'fasta',
                 'size':forward_shock_file['file']['size']
             },
-            'sequencing_tech':sequencing_tech
         }
         ws = workspaceService(self.workspaceURL, token=ctx['token'])
         new_obj_info = ws.save_objects({
                         'workspace':workspace_name,
                         'objects':[
                             {
-                                'type':'KBaseFile.SingleEndLibrary',
+                                'type':'KBaseAssembly.SingleEndLibrary',
                                 'data':single_end_library,
                                 'name':obj_name,
                                 'meta':{},
@@ -306,7 +305,7 @@ class kb_vsearch:
         #### Get the input_many object
         ##
         many_forward_reads_file_compression = None
-        sequencing_tech = 'artificial reads'
+        #sequencing_tech = 'artificial reads'
         try:
             ws = workspaceService(self.workspaceURL, token=ctx['token'])
             objects = ws.get_objects([{'ref': params['workspace_name']+'/'+params['input_many_name']}])
@@ -315,8 +314,8 @@ class kb_vsearch:
             many_type_name = info[2].split('.')[1].split('-')[0]
             if data['lib']['file']['file_name'][-3:] == ".gz":
                 many_forward_reads_file_compression = 'gz'
-            if 'sequencing_tech' in data:
-                sequencing_tech = data['sequencing_tech']
+            #if 'sequencing_tech' in data:
+            #    sequencing_tech = data['sequencing_tech']
 
         except Exception as e:
             raise ValueError('Unable to fetch input_many_name object from workspace: ' + str(e))
@@ -601,8 +600,8 @@ class kb_vsearch:
                                                       params['workspace_name'],,
                                                       params['output_filtered_name'],
                                                       output_filtered_fasta_file_path,
-                                                      provenance,
-                                                      sequencing_tech
+                                                      provenance
+                                                      #sequencing_tech
                                                      )
         # build output report object
         #
