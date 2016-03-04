@@ -175,9 +175,9 @@ class kb_vsearch:
                 },
                 'encoding':'UTF8',
                 'type':'fasta',
-                'size':forward_shock_file['file']['size'],
-                'sequencing_tech':sequencing_tech
+                'size':forward_shock_file['file']['size']
             },
+            'sequencing_tech':sequencing_tech
         }
         self.log(console,'GETTING WORKSPACE SERVICE OBJECT')
         ws = workspaceService(self.workspaceURL, token=ctx['token'])
