@@ -184,7 +184,7 @@ class kb_vsearch:
                         'workspace':workspace_name,
                         'objects':[
                             {
-                                'type':'KBaseAssembly.SingleEndLibrary',
+                                'type':'KBaseFile.SingleEndLibrary',
                                 'data':single_end_library,
                                 'name':obj_name,
                                 'meta':{},
