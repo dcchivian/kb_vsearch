@@ -134,7 +134,8 @@ class kb_vsearch:
                                                  workspace_name,
                                                  obj_name,
                                                  file_path,
-                                                 provenance):
+                                                 provenance,
+                                                 sequencing_tech):
 
         self.log(console,'UPLOADING FILE '+file_path+' TO '+workspace_name+'/'+obj_name)
 
@@ -174,7 +175,8 @@ class kb_vsearch:
                 },
                 'encoding':'UTF8',
                 'type':'fasta',
-                'size':forward_shock_file['file']['size']
+                'size':forward_shock_file['file']['size'],
+                'sequencing_tech':sequencing_tech
             },
         }
         self.log(console,'GETTING WORKSPACE SERVICE OBJECT')
@@ -318,7 +320,7 @@ class kb_vsearch:
         #### Get the input_many object
         ##
         many_forward_reads_file_compression = None
-        #sequencing_tech = 'artificial reads'
+        sequencing_tech = 'artificial reads'
         try:
             ws = workspaceService(self.workspaceURL, token=ctx['token'])
             objects = ws.get_objects([{'ref': params['workspace_name']+'/'+params['input_many_name']}])
@@ -336,8 +338,8 @@ class kb_vsearch:
             self.log(console, 'INPUT_MANY_FILENAME: '+file_name)  # DEBUG
             if file_name[-3:] == ".gz":
                 many_forward_reads_file_compression = 'gz'
-            #if 'sequencing_tech' in data:
-            #    sequencing_tech = data['sequencing_tech']
+            if 'sequencing_tech' in data:
+                sequencing_tech = data['sequencing_tech']
 
         except Exception as e:
             raise ValueError('Unable to fetch input_many_name object from workspace: ' + str(e))
@@ -626,8 +628,8 @@ class kb_vsearch:
                                                       params['workspace_name'],
                                                       params['output_filtered_name'],
                                                       output_filtered_fasta_file_path,
-                                                      provenance
-                                                      #sequencing_tech
+                                                      provenance,
+                                                      sequencing_tech
                                                      )
         # build output report object
         #
