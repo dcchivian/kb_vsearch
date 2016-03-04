@@ -38,7 +38,7 @@
             "optional": false,
             "advanced": false,
             "allow_multiple": false,
-            "default_values": [ "" ],
+            "default_values": [ "foo.fna" ],
             "field_type": "text",
             "text_options": {
                 "valid_ws_types": [ "KBaseAssembly.SingleEndLibrary" ]
