@@ -19,7 +19,7 @@
             "default_values": [ "" ],
             "field_type": "text",
             "text_options": {
-                "valid_ws_types": [ "KBaseFile.SingleEndLibrary" ]
+                "valid_ws_types": [ "KBaseAssembly.SingleEndLibrary" ]
             }
         },
         {
@@ -30,7 +30,7 @@
             "default_values": [ "" ],
             "field_type": "text",
             "text_options": {
-                "valid_ws_types": [ "KBaseFile.SingleEndLibrary" ]
+                "valid_ws_types": [ "KBaseAssembly.SingleEndLibrary" ]
             }
         },
         {
@@ -41,7 +41,7 @@
             "default_values": [ "" ],
             "field_type": "text",
             "text_options": {
-                "valid_ws_types": [ "KBaseFile.SingleEndLibrary" ]
+                "valid_ws_types": [ "KBaseAssembly.SingleEndLibrary" ]
             }
         },
         {
