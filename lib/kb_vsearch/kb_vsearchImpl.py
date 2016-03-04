@@ -597,7 +597,7 @@ class kb_vsearch:
         # upload reads
         #
         self.upload_SingleEndLibrary_to_shock_and_ws (ctx,
-                                                      params['workspace_name'],,
+                                                      params['workspace_name'],
                                                       params['output_filtered_name'],
                                                       output_filtered_fasta_file_path,
                                                       provenance
