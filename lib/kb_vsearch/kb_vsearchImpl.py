@@ -313,8 +313,13 @@ class kb_vsearch:
             data = objects[0]['data']
             info = objects[0]['info']
             many_type_name = info[2].split('.')[1].split('-')[0]
-#            if data['lib']['file']['file_name'][-3:] == ".gz":
-#                many_forward_reads_file_compression = 'gz'
+            if 'lib' in data and \
+                    'file' in data['lib'] and \
+                    'file_name' in data['lib']['file']:
+                file_name = data['lib']['file']['file_name']
+                self.log(console, 'INPUT_MANY_FILENAME: '+file_name)
+#                if file_name[-3:] == ".gz":
+#                    many_forward_reads_file_compression = 'gz'
             #if 'sequencing_tech' in data:
             #    sequencing_tech = data['sequencing_tech']
 
