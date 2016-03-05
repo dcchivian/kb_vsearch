@@ -251,11 +251,15 @@ class kb_vsearch:
             one_forward_reads_file_handle = open(one_forward_reads_file_path, 'w', 0)
             input_sequence_buf = params['input_one_sequence'].split("\n")
 
+            one_forward_reads_file_handle.write('>UserQuery')
+            query_line_seen = False
             for line in input_sequence_buf:
-                if line.startswith('>'):
-                    one_forward_reads_file_handle.write('>UserQuery')
-                    continue
-                one_forward_reads_file_handle.write(line)
+                if not line.startswith('>'):
+                    one_forward_reads_file_handle.write(line)
+                else:
+                    if query_line_seen:
+                        break
+                    query_line_seen = True
             one_forward_reads_file_handle.close();
             self.log(console, 'done')
 
