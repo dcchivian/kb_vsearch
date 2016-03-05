@@ -30,7 +30,7 @@
             "default_values": [ "" ],
             "field_type": "text",
             "text_options": {
-                "valid_ws_types": [ "KBaseAssembly.SingleEndLibrary","KBaseCollections.FeatureSet","KBaseGenome.Feature" ]
+                "valid_ws_types": [ "KBaseAssembly.SingleEndLibrary","KBaseCollections.FeatureSet","KBaseGenomes.Feature" ]
             }
         },
         {
