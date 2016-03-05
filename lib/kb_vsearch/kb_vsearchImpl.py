@@ -320,7 +320,7 @@ class kb_vsearch:
 
             elif one_type_name == 'FeatureSet':
                 # retrieve sequences for features
-                featureSet = ['data']
+                featureSet = data
 
                 genome2Features = {}
                 features = featureSet['elements']
