@@ -47,10 +47,10 @@ RUN make install
 
 # add test data
 #
-RUN mkdir -p /kb/module/test
-WORKDIR /kb/module/test
-RUN git clone https://github.com/dcchivian/kb_vsearch_test_data
-WORKDIR /kb/module
+#RUN mkdir -p /kb/module/test
+#WORKDIR /kb/module/test
+#RUN git clone https://github.com/dcchivian/kb_vsearch_test_data
+#WORKDIR /kb/module
 
 
 ENTRYPOINT [ "./scripts/entrypoint.sh" ]
