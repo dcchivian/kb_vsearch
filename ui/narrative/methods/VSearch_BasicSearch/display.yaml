@@ -34,14 +34,14 @@ parameters :
             Single sequence to use for the search.
     input_one_name:
         ui-name : |
-            Query Object
+            or Query Object
         short-hint : |
-            Sequence object with one sequence to use as query.  SingleEndLibrary or FeatureSet.  Must contain only one sequence.
+            Query with single sequence to use as query.  SingleEndLibrary or FeatureSet.  Must contain only one sequence.
     input_many_name:
         ui-name : |
             Targets Object
         short-hint : |
-            Sequences object to be searched.  SingleEndLibrary, FeatureSet, Genome, or GenomeSet.
+            Targets object to be searched.  SingleEndLibrary, FeatureSet, Genome, or GenomeSet.
     output_filtered_name:
         ui-name : |
             Output Object
