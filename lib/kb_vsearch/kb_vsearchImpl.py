@@ -244,7 +244,8 @@ class kb_vsearch:
         #### Get the input_one object
         ##
         if 'input_one_sequence' in params \
-                and params['input_one_sequence'] != "Enter DNA sequence or select Query file":
+                and params['input_one_sequence'] != None \
+                and params['input_one_sequence'] != "Enter DNA sequence":
             input_one_file_name = 'user_query.fna'
             one_forward_reads_file_path = os.path.join(self.scratch,input_one_file_name)
             one_forward_reads_file_handle = open(one_forward_reads_file_path, 'w', 0)
@@ -309,8 +310,8 @@ class kb_vsearch:
                     r = requests.get(one_forward_reads['url']+'/node/'+one_forward_reads['id']+'?download', stream=True, headers=headers)
                     for chunk in r.iter_content(1024):
                         one_forward_reads_file_handle.write(chunk)
-                        one_forward_reads_file_handle.close();
-                        self.log(console, 'done')
+                    one_forward_reads_file_handle.close();
+                    self.log(console, 'done')
                     ### END NOTE
 
                 except Exception as e:
