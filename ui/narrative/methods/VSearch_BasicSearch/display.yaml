@@ -38,19 +38,19 @@ parameters :
         ui-name : |
             Query Object
         short-hint : |
-            Query with single sequence to use as query.  SingleEndLibrary or FeatureSet.  Must contain only one sequence.
+            Query with single sequence to use as query.  Data types may be Feature, SingleEndLibrary (with one sequence), or FeatureSet (with one sequence).
         placeholder : |
             ...or select Query Object
     input_many_name:
         ui-name : |
             Targets Object
         short-hint : |
-            Targets object to be searched.  SingleEndLibrary, FeatureSet, Genome, or GenomeSet.
+            Targets object to be searched.  Data types may be SingleEndLibrary, FeatureSet, Genome, or GenomeSet.
     output_filtered_name:
         ui-name : |
             Output Object
         short-hint : |
-            Object containing matches.  Will be SingleEndLibrary for SingleEndLibrary Target, otherwise will be FeatureSet.
+            Object containing matches.  Output will be SingleEndLibrary for SingleEndLibrary Targets, otherwise will be FeatureSet.
     maxaccepts:
         ui-name : |
             Max Accepts
