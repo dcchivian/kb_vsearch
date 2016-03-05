@@ -217,6 +217,7 @@ class kb_vsearch:
         #END_CONSTRUCTOR
         pass
 
+
     def VSearch_BasicSearch(self, ctx, params):
         # ctx is the context object
         # return variables are: returnVal
@@ -229,109 +230,94 @@ class kb_vsearch:
 
 
         #### do some basic checks
-        objref = ''
+        #
         if 'workspace_name' not in params:
             raise ValueError('workspace_name parameter is required')
-        if 'input_one_name' not in params and \
-                'input_one_sequence' not in params:
+        if 'input_one_name' not in params and 'input_one_sequence' not in params:
             raise ValueError('input_one_sequence or input_one_name parameter is required')
         if 'input_many_name' not in params:
             raise ValueError('input_many_name parameter is required')
         if 'output_filtered_name' not in params:
             raise ValueError('output_filtered_name parameter is required')
 
+
         #### Get the input_one object
         ##
-        try:
-            ws = workspaceService(self.workspaceURL, token=ctx['token'])
-            objects = ws.get_objects([{'ref': params['workspace_name']+'/'+params['input_one_name']}])
-            data = objects[0]['data']
-            info = objects[0]['info']
-            # Object Info Contents
-            # absolute ref = info[6] + '/' + info[0] + '/' + info[4]
-            # 0 - obj_id objid
-            # 1 - obj_name name
-            # 2 - type_string type
-            # 3 - timestamp save_date
-            # 4 - int version
-            # 5 - username saved_by
-            # 6 - ws_id wsid
-            # 7 - ws_name workspace
-            # 8 - string chsum
-            # 9 - int size 
-            # 10 - usermeta meta
-            one_type_name = info[2].split('.')[1].split('-')[0]
-        except Exception as e:
-            raise ValueError('Unable to fetch input_one_name object from workspace: ' + str(e))
-            #to get the full stack trace: traceback.format_exc()
+        if 'input_one_sequence' in params \
+                and params['input_one_sequence'] != "Enter DNA sequence or select Query file":
+            self.log(console, 'writing query reads file: '+str(one_forward_reads_file_path))
+            input_one_file_name = 'user_query.fna'
+            one_forward_reads_file_path = os.path.join(self.scratch,input_one_file_name)
+            one_forward_reads_file_handle = open(one_forward_reads_file_path, 'w', 0)
+            input_sequence_buf = params['input_one_sequence'].split("\n")
 
-        # Handle overloading (input_one can be SingleEndLibrary or FeatureSet)
-        #
-        #  Note: currently only support SingleEndLibrary
-        #
-        if one_type_name == 'SingleEndLibrary':
+            for line in input_sequence_buf:
+                if line.startswith('>'):
+                    one_forward_reads_file_handle.write('>UserQuery')
+                    continue
+                one_forward_reads_file_handle.write(line)
+            one_forward_reads_file_handle.close();
+            self.log(console, 'done')
+
+        else:  # obtain object
             try:
-                if 'lib' in data:
-                    one_forward_reads = data['lib']['file']
-                elif 'handle' in data:
-                    one_forward_reads = data['handle']
-                else:
-                    self.log(console,"bad structure for 'one_forward_reads'")
-                    raise ValueError("bad structure for 'one_forward_reads'")
-                #if 'lib2' in data:
-                #    reverse_reads = data['lib2']['file']
-                #elif 'handle_2' in data:
-                #    reverse_reads = data['handle_2']
-                #else:
-                #    reverse_reads={}
-
-                ### NOTE: this section is what could be replaced by the transform services
-                one_forward_reads_file_path = os.path.join(self.scratch,one_forward_reads['file_name'])
-                one_forward_reads_file_handle = open(one_forward_reads_file_path, 'w', 0)
-                self.log(console, 'downloading reads file: '+str(one_forward_reads_file_path))
-                headers = {'Authorization': 'OAuth '+ctx['token']}
-                r = requests.get(one_forward_reads['url']+'/node/'+one_forward_reads['id']+'?download', stream=True, headers=headers)
-                for chunk in r.iter_content(1024):
-                    one_forward_reads_file_handle.write(chunk)
-                one_forward_reads_file_handle.close();
-                self.log(console, 'done')
-                ### END NOTE
-
-                #if 'interleaved' in data and data['interleaved']:
-                #    self.log(console, 'extracting forward/reverse reads into separate files')
-                #    if re.search('gz', forward_reads['file_name'], re.I):
-                #        bcmdstring = 'gunzip -c ' + forward_reads_file_path
-                #    else:    
-                #        bcmdstring = 'cat ' + forward_reads_file_path 
-                # 
-                #    cmdstring = bcmdstring + '| (paste - - - - - - - -  | tee >(cut -f 1-4 | tr "\t" "\n" > '+self.scratch+'/forward.fastq) | cut -f 5-8 | tr "\t" "\n" > '+self.scratch+'/reverse.fastq )'
-                #    cmdProcess = subprocess.Popen(cmdstring, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, executable='/bin/bash')
-                #    stdout, stderr = cmdProcess.communicate()
-                #
-                #    self.log(console, "cmdstring: " + cmdstring + " stdout: " + stdout + " stderr: " + stderr)
-                #    
-                #    forward_reads['file_name']='forward.fastq'
-                #    reverse_reads['file_name']='reverse.fastq'
-                #else:
-                #    ### NOTE: this section is what could also be replaced by the transform services
-                #    reverse_reads_file_path = os.path.join(self.scratch,reverse_reads['file_name'])
-                #    reverse_reads_file_handle = open(reverse_reads_file_path, 'w', 0)
-                #    self.log(console, 'downloading reverse reads file: '+str(reverse_reads_file_path))
-                #    r = requests.get(reverse_reads['url']+'/node/'+reverse_reads['id']+'?download', stream=True, headers=headers)
-                #    for chunk in r.iter_content(1024):
-                #        reverse_reads_file_handle.write(chunk)
-                #    reverse_reads_file_handle.close()
-                #    self.log(console, 'done')
-                #    ### END NOTE
+                ws = workspaceService(self.workspaceURL, token=ctx['token'])
+                objects = ws.get_objects([{'ref': params['workspace_name']+'/'+params['input_one_name']}])
+                data = objects[0]['data']
+                info = objects[0]['info']
+                # Object Info Contents
+                # absolute ref = info[6] + '/' + info[0] + '/' + info[4]
+                # 0 - obj_id objid
+                # 1 - obj_name name
+                # 2 - type_string type
+                # 3 - timestamp save_date
+                # 4 - int version
+                # 5 - username saved_by
+                # 6 - ws_id wsid
+                # 7 - ws_name workspace
+                # 8 - string chsum
+                # 9 - int size 
+                # 10 - usermeta meta
+                one_type_name = info[2].split('.')[1].split('-')[0]
             except Exception as e:
-                print(traceback.format_exc())
-                raise ValueError('Unable to download single-end read library files: ' + str(e))
+                raise ValueError('Unable to fetch input_one_name object from workspace: ' + str(e))
+                #to get the full stack trace: traceback.format_exc()
 
-        #elif one_type_name == 'FeatureSet':
-        #    # retrieve sequences for features
+            # Handle overloading (input_one can be SingleEndLibrary or FeatureSet)
+            #
+            #  Note: currently only support SingleEndLibrary
+            #
+            if one_type_name == 'SingleEndLibrary':
+                try:
+                    if 'lib' in data:
+                        one_forward_reads = data['lib']['file']
+                    elif 'handle' in data:
+                        one_forward_reads = data['handle']
+                    else:
+                        self.log(console,"bad structure for 'one_forward_reads'")
+                        raise ValueError("bad structure for 'one_forward_reads'")
 
-        else:
-            raise ValueError('Cannot yet handle input_one type of: '+type_name)            
+                    ### NOTE: this section is what could be replaced by the transform services
+                    one_forward_reads_file_path = os.path.join(self.scratch,one_forward_reads['file_name'])
+                    one_forward_reads_file_handle = open(one_forward_reads_file_path, 'w', 0)
+                    self.log(console, 'downloading reads file: '+str(one_forward_reads_file_path))
+                    headers = {'Authorization': 'OAuth '+ctx['token']}
+                    r = requests.get(one_forward_reads['url']+'/node/'+one_forward_reads['id']+'?download', stream=True, headers=headers)
+                    for chunk in r.iter_content(1024):
+                        one_forward_reads_file_handle.write(chunk)
+                        one_forward_reads_file_handle.close();
+                        self.log(console, 'done')
+                    ### END NOTE
+
+                except Exception as e:
+                    print(traceback.format_exc())
+                    raise ValueError('Unable to download single-end read library files: ' + str(e))
+
+            #elif one_type_name == 'FeatureSet':
+            #    # retrieve sequences for features
+
+            else:
+                raise ValueError('Cannot yet handle input_one type of: '+type_name)            
 
 
         #### Get the input_many object
