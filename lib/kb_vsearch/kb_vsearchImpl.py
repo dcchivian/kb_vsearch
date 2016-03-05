@@ -621,7 +621,8 @@ class kb_vsearch:
             provenance = ctx['provenance']
         # add additional info to provenance here, in this case the input data object reference
         provenance[0]['input_ws_objects'] = []
-        provenance[0]['input_ws_objects'].append(params['workspace_name']+'/'+params['input_one_name'])
+        if 'input_one_name' in params and params['input_one_name'] != None:
+            provenance[0]['input_ws_objects'].append(params['workspace_name']+'/'+params['input_one_name'])
         provenance[0]['input_ws_objects'].append(params['workspace_name']+'/'+params['input_many_name'])
         provenance[0]['service'] = 'kb_vsearch'
         provenance[0]['method'] = 'VSearch_BasicSearch'
