@@ -16,7 +16,7 @@
             "optional": true,
             "advanced": false,
             "allow_multiple": false,
-            "default_values": [ "Enter DNA sequence or select Query file" ],
+            "default_values": [ "" ],
             "field_type": "textarea",
             "text_options": {
                 "valid_ws_types": [ "KBaseAssembly.SingleEndLibrary" ]
