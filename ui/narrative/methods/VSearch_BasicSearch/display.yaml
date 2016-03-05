@@ -33,7 +33,7 @@ parameters :
         short-hint : |
             Single sequence to use for the search.
         placeholder : |
-            "Enter DNA sequence or select Query Object"
+            Enter DNA sequence or select Query Object
     input_one_name:
         ui-name : |
             Query Object
