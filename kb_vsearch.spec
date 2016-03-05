@@ -18,22 +18,19 @@ module kb_vsearch {
     ** "name" is a string identifier of a workspace or object.  This is received from Narrative.
     */
     typedef string workspace_name;
-    typedef string one_name;
-    typedef string many_name;
-    typedef string output_name;
-    typedef string output_ref;
-
-    typedef string report_name;
-    typedef string report_ref;
+    typedef string sequence;
+    typedef string data_obj_name;
+    typedef string data_obj_ref;
 
 
     /* VSearch BasicSearch Input Params
     */
     typedef structure {
         workspace_name workspace_name;
-	one_name       input_one_name;
-	many_name      input_many_name;
-        output_name    output_filtered_name;
+	sequence       input_one_string;
+	data_obj_name  input_one_name;
+	data_obj_name  input_many_name;
+        data_obj_name  output_filtered_name;
 
 	int    maxaccepts;
 	int    maxrejects;
@@ -47,10 +44,9 @@ module kb_vsearch {
     /* VSearch BasicSearch Output
     */
     typedef structure {
-	report_name output_report_name;
-	report_ref  output_report_ref;
-
-        output_ref  output_filtered_ref;
+	data_obj_name output_report_name;
+	data_obj_ref  output_report_ref;
+        data_obj_ref  output_filtered_ref;
 
         int n_initial_seqs;
         int n_seqs_matched;

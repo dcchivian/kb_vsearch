@@ -12,8 +12,19 @@
     },
     "parameters": [ 
         {
+            "id": "input_one_sequence",
+            "optional": true,
+            "advanced": false,
+            "allow_multiple": false,
+            "default_values": [ "Enter DNA sequence or select Query file" ],
+            "field_type": "textarea",
+            "text_options": {
+                "valid_ws_types": [ "KBaseAssembly.SingleEndLibrary" ]
+            }
+        },
+        {
             "id": "input_one_name",
-            "optional": false,
+            "optional": true,
             "advanced": false,
             "allow_multiple": false,
             "default_values": [ "" ],
@@ -128,6 +139,10 @@
                 {
                     "narrative_system_variable": "workspace",
                     "target_property": "workspace_name"
+                },
+                {
+                    "input_parameter": "input_one_sequence",
+                    "target_property": "input_one_sequence"
                 },
                 {
                     "input_parameter": "input_one_name",

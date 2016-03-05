@@ -199,7 +199,23 @@ class kb_vsearch:
 
     #END_CLASS_HEADER
 
+    # config contains contents of config file in a hash or None if it couldn't
+    # be found
+    def __init__(self, config):
+        #BEGIN_CONSTRUCTOR
+        self.workspaceURL = config['workspace-url']
+        self.shockURL = config['shock-url']
+        self.handleURL = config['handle-service-url']
+        self.scratch = os.path.abspath(config['scratch'])
+        # HACK!! temporary hack for issue where megahit fails on mac because of silent named pipe error
+        #self.host_scratch = self.scratch
+        self.scratch = os.path.join('/kb','module','local_scratch')
+        # end hack
+        if not os.path.exists(self.scratch):
+            os.makedirs(self.scratch)
 
+        #END_CONSTRUCTOR
+        pass
 
     def VSearch_BasicSearch(self, ctx, params):
         # ctx is the context object
@@ -216,8 +232,9 @@ class kb_vsearch:
         objref = ''
         if 'workspace_name' not in params:
             raise ValueError('workspace_name parameter is required')
-        if 'input_one_name' not in params:
-            raise ValueError('input_one_name parameter is required')
+        if 'input_one_name' not in params and \
+                'input_one_sequence' not in params:
+            raise ValueError('input_one_sequence or input_one_name parameter is required')
         if 'input_many_name' not in params:
             raise ValueError('input_many_name parameter is required')
         if 'output_filtered_name' not in params:
