@@ -18,8 +18,8 @@
             "allow_multiple": false,
             "default_values": [ "" ],
             "field_type": "textarea",
-            "text_options": {
-                "valid_ws_types": [ "KBaseAssembly.SingleEndLibrary" ]
+            "textarea_options" : {
+                 "n_rows" : 10
             }
         },
         {
