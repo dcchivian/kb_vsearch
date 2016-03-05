@@ -291,7 +291,7 @@ class kb_vsearch:
                 raise ValueError('Unable to fetch input_one_name object from workspace: ' + str(e))
                 #to get the full stack trace: traceback.format_exc()
 
-            # Handle overloading (input_one can be SingleEndLibrary or FeatureSet)
+            # Handle overloading (input_one can be Feature, SingleEndLibrary, or FeatureSet)
             #
             #  Note: currently only support SingleEndLibrary
             #
@@ -345,6 +345,14 @@ class kb_vsearch:
                             record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genomeRef+"."+feature['id'])
                             records.append(record)
                             SeqIO.write(records, one_forward_reads_file_path, "fasta")
+
+            elif one_type_name == 'Feature':
+                # export feature to FASTA file
+                feature = data
+                one_forward_reads_file_path = os.path.join(self.scratch, params['input_one_name']+".fasta")
+                self.log(console, 'writing fasta file: '+one_forward_reads_file_path)
+                record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description='['+feature['genome_id']+']'+' '+feature['function'])
+                SeqIO.write([record], one_forward_reads_file_path, "fasta")
 
             else:
                 raise ValueError('Cannot yet handle input_one type of: '+type_name)            
