@@ -245,7 +245,7 @@ class kb_vsearch:
         ##
         if 'input_one_sequence' in params \
                 and params['input_one_sequence'] != None \
-                and params['input_one_sequence'] != "Enter DNA sequence":
+                and params['input_one_sequence'] != "Enter DNA sequence...":
             input_one_file_name = 'user_query.fna'
             one_forward_reads_file_path = os.path.join(self.scratch,input_one_file_name)
             one_forward_reads_file_handle = open(one_forward_reads_file_path, 'w', 0)
@@ -318,8 +318,30 @@ class kb_vsearch:
                     print(traceback.format_exc())
                     raise ValueError('Unable to download single-end read library files: ' + str(e))
 
-            #elif one_type_name == 'FeatureSet':
-            #    # retrieve sequences for features
+            elif one_type_name == 'FeatureSet':
+                # retrieve sequences for features
+                featureSet = ['data']
+
+                genome2Features = {}
+                features = featureSet['elements']
+                for fId in features.keys():
+                    genomeRef = features[fId][0]
+                    if genomeRef not in genome2Features:
+                        genome2Features[genomeRef] = []
+                        genome2Features[genomeRef].append(fId)
+
+                # export features to FASTA file
+                one_forward_reads_file_path = os.path.join(self.scratch, params['input_one_name']+".fasta")
+                self.log(console, 'writing fasta file: '+one_forward_reads_file_path)
+                records = []
+                for genomeRef in genome2Features:
+                    genome = ws.get_objects([{'ref':genomeRef}])[0]['data']
+                    these_genomeFeatureIds = genome2Features[genomeRef]
+                    for feature in genome['features']:
+                        if feature['id'] in these_genomeFeatureIds:
+                            record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genomeRef+"."+feature['id'])
+                            records.append(record)
+                            SeqIO.write(records, one_forward_reads_file_path, "fasta")
 
             else:
                 raise ValueError('Cannot yet handle input_one type of: '+type_name)            
