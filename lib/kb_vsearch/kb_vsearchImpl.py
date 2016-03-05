@@ -245,12 +245,12 @@ class kb_vsearch:
         ##
         if 'input_one_sequence' in params \
                 and params['input_one_sequence'] != "Enter DNA sequence or select Query file":
-            self.log(console, 'writing query reads file: '+str(one_forward_reads_file_path))
             input_one_file_name = 'user_query.fna'
             one_forward_reads_file_path = os.path.join(self.scratch,input_one_file_name)
             one_forward_reads_file_handle = open(one_forward_reads_file_path, 'w', 0)
-            input_sequence_buf = params['input_one_sequence'].split("\n")
+            self.log(console, 'writing query reads file: '+str(one_forward_reads_file_path))
 
+            input_sequence_buf = params['input_one_sequence'].split("\n")
             one_forward_reads_file_handle.write('>UserQuery')
             query_line_seen = False
             for line in input_sequence_buf:
