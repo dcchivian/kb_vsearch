@@ -651,7 +651,10 @@ class kb_vsearch:
         #
         elif many_type_name == 'FeatureSet':
             output_featureSet = dict()
-            output_featureSet['description'] = input_many_featureSet['description'] + " - VSearch_BasicSearch filtered"
+            if 'description' in input_many_featureSet and input_many_featureSet['description'] != None:
+                output_featureSet['description'] = input_many_featureSet['description'] + " - VSearch_BasicSearch filtered"
+            else:
+                output_featureSet['description'] = "VSearch_BasicSearch filtered"
             output_featureSet['element_ordering'] = []
             output_featureSet['elements'] = dict()
             if 'element_ordering' in input_many_featureSet:
