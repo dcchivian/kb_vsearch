@@ -361,7 +361,7 @@ class kb_vsearch:
         #### Get the input_many object
         ##
         many_forward_reads_file_compression = None
-        sequencing_tech = 'artificial reads'
+        sequencing_tech = 'N/A'
         try:
             ws = workspaceService(self.workspaceURL, token=ctx['token'])
             objects = ws.get_objects([{'ref': params['workspace_name']+'/'+params['input_many_name']}])
@@ -369,18 +369,19 @@ class kb_vsearch:
             info = objects[0]['info']
             many_type_name = info[2].split('.')[1].split('-')[0]
 
-            many_type_namespace = info[2].split('.')[0]
-            if many_type_namespace == 'KBaseAssembly':
-                file_name = data['handle']['file_name']
-            elif many_type_namespace == 'KBaseFile':
-                file_name = data['lib']['file']['file_name']
-            else:
-                raise ValueError('bad data type namespace: '+many_type_namespace)
-            self.log(console, 'INPUT_MANY_FILENAME: '+file_name)  # DEBUG
-            if file_name[-3:] == ".gz":
-                many_forward_reads_file_compression = 'gz'
-            if 'sequencing_tech' in data:
-                sequencing_tech = data['sequencing_tech']
+            if many_type_name == 'SingleEndLibrary':
+                many_type_namespace = info[2].split('.')[0]
+                if many_type_namespace == 'KBaseAssembly':
+                    file_name = data['handle']['file_name']
+                elif many_type_namespace == 'KBaseFile':
+                    file_name = data['lib']['file']['file_name']
+                else:
+                    raise ValueError('bad data type namespace: '+many_type_namespace)
+                #self.log(console, 'INPUT_MANY_FILENAME: '+file_name)  # DEBUG
+                if file_name[-3:] == ".gz":
+                    many_forward_reads_file_compression = 'gz'
+                if 'sequencing_tech' in data:
+                    sequencing_tech = data['sequencing_tech']
 
         except Exception as e:
             raise ValueError('Unable to fetch input_many_name object from workspace: ' + str(e))
@@ -425,6 +426,31 @@ class kb_vsearch:
             except Exception as e:
                 print(traceback.format_exc())
                 raise ValueError('Unable to download single-end read library files: ' + str(e))
+
+        elif many_type_name == 'FeatureSet':
+            # retrieve sequences for features
+            featureSet = data
+
+            genome2Features = {}
+            features = featureSet['elements']
+            for fId in features.keys():
+                genomeRef = features[fId][0]
+                if genomeRef not in genome2Features:
+                    genome2Features[genomeRef] = []
+                    genome2Features[genomeRef].append(fId)
+
+            # export features to FASTA file
+            many_forward_reads_file_path = os.path.join(self.scratch, params['input_many_name']+".fasta")
+            self.log(console, 'writing fasta file: '+many_forward_reads_file_path)
+            records = []
+            for genomeRef in genome2Features:
+                genome = ws.get_objects([{'ref':genomeRef}])[0]['data']
+                these_genomeFeatureIds = genome2Features[genomeRef]
+                for feature in genome['features']:
+                    if feature['id'] in these_genomeFeatureIds:
+                        record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genomeRef+"."+feature['id'])
+                        records.append(record)
+                        SeqIO.write(records, many_forward_reads_file_path, "fasta")
 
         #elif many_type_name == 'Genome':
         #    # retrieve sequences for features
