@@ -577,66 +577,63 @@ class kb_vsearch:
         #
         self.log(console, 'FILTERING OUT HITS')
 
-        if many_type_name == 'SingleEndLibrary':
-            
 #            with open(many_forward_reads_file_path, 'r', -1) as many_forward_reads_file_handle, open(output_filtered_fasta_file_path, 'w', -1) as output_filtered_fasta_file_handle:
-            output_filtered_fasta_file_handle = open(output_filtered_fasta_file_path, 'w', -1)
-            if many_forward_reads_file_compression == 'gz':
-                many_forward_reads_file_handle = gzip.open(many_forward_reads_file_path, 'r', -1)
-            else:
-                many_forward_reads_file_handle = open(many_forward_reads_file_path, 'r', -1)
+        output_filtered_fasta_file_handle = open(output_filtered_fasta_file_path, 'w', -1)
+        if many_forward_reads_file_compression == 'gz':
+            many_forward_reads_file_handle = gzip.open(many_forward_reads_file_path, 'r', -1)
+        else:
+            many_forward_reads_file_handle = open(many_forward_reads_file_path, 'r', -1)
 
+        seq_total = 0;
+        filtered_seq_total = 0
+        last_seq_buf = []
+        last_seq_id = None
+        last_header = None
+        for line in many_forward_reads_file_handle:
+            if line.startswith('>'):
+                #self.log(console, 'LINE: '+line)  # DEBUG
+                seq_total += 1
+                seq_id = line[1:]
+                if "\n" in seq_id:
+                    seq_id = seq_id[0:seq_id.find("\n")+1]
+                if "\t" in seq_id:
+                    seq_id = seq_id[0:seq_id.find("\t")+1]
+                if " " in seq_id:
+                    seq_id = seq_id[0:seq_id.find(" ")+1]
+                    
+                if last_seq_id != None:
+                    #self.log(console, 'ID: '+last_seq_id)  # DEBUG
+                    try:
+                        in_filtered_set = hit_seq_ids[last_seq_id]
+                        #self.log(console, 'FOUND HIT '+last_seq_id)  # DEBUG
+                        filtered_seq_total += 1
+                        output_filtered_fasta_file_handle.write(last_header)
+                        output_filtered_fasta_file_handle.writelines(last_seq_buf)
+                    except:
+                        pass
+                        
+                last_seq_buf = []
+                last_seq_id = seq_id
+                last_header = line
+            else:
+                last_seq_buf.append(line)
+        if last_seq_id != None:
+            #self.log(console, 'ID: '+last_seq_id)  # DEBUG
+            try:
+                in_filtered_set = hit_seq_ids[last_seq_id]
+                #self.log(console, 'FOUND HIT: '+last_seq_id)  # DEBUG
+                filtered_seq_total += 1
+                output_filtered_fasta_file_handle.write(last_header)
+                output_filtered_fasta_file_handle.writelines(last_seq_buf)
+            except:
+                pass
                 
-            seq_total = 0;
-            filtered_seq_total = 0
             last_seq_buf = []
             last_seq_id = None
             last_header = None
-            for line in many_forward_reads_file_handle:
-                if line.startswith('>'):
-                    #self.log(console, 'LINE: '+line)  # DEBUG
-                    seq_total += 1
-                    seq_id = line[1:]
-                    if "\n" in seq_id:
-                        seq_id = seq_id[0:seq_id.find("\n")+1]
-                    if "\t" in seq_id:
-                        seq_id = seq_id[0:seq_id.find("\t")+1]
-                    if " " in seq_id:
-                        seq_id = seq_id[0:seq_id.find(" ")+1]
-                    
-                    if last_seq_id != None:
-                        #self.log(console, 'ID: '+last_seq_id)  # DEBUG
-                        try:
-                            in_filtered_set = hit_seq_ids[last_seq_id]
-                            #self.log(console, 'FOUND HIT '+last_seq_id)  # DEBUG
-                            filtered_seq_total += 1
-                            output_filtered_fasta_file_handle.write(last_header)
-                            output_filtered_fasta_file_handle.writelines(last_seq_buf)
-                        except:
-                            pass
-                        
-                    last_seq_buf = []
-                    last_seq_id = seq_id
-                    last_header = line
-                else:
-                    last_seq_buf.append(line)
-            if last_seq_id != None:
-                #self.log(console, 'ID: '+last_seq_id)  # DEBUG
-                try:
-                    in_filtered_set = hit_seq_ids[last_seq_id]
-                    #self.log(console, 'FOUND HIT: '+last_seq_id)  # DEBUG
-                    filtered_seq_total += 1
-                    output_filtered_fasta_file_handle.write(last_header)
-                    output_filtered_fasta_file_handle.writelines(last_seq_buf)
-                except:
-                    pass
-                
-                last_seq_buf = []
-                last_seq_id = None
-                last_header = None
 
-            many_forward_reads_file_handle.close()
-            output_filtered_fasta_file_handle.close()
+        many_forward_reads_file_handle.close()
+        output_filtered_fasta_file_handle.close()
 
         if filtered_seq_total != hit_total:
             self.log(console,'hits in VSearch alignment output '+str(hit_total)+' != '+str(filtered_seq_total)+' matched sequences in input file')
@@ -688,17 +685,26 @@ class kb_vsearch:
         provenance[0]['method'] = 'VSearch_BasicSearch'
 
 
-        # upload reads
-        #
-        self.log(console,"UPLOADING RESULTS")  # DEBUG
-        self.upload_SingleEndLibrary_to_shock_and_ws (ctx,
-                                                      console,  # DEBUG
-                                                      params['workspace_name'],
-                                                      params['output_filtered_name'],
-                                                      output_filtered_fasta_file_path,
-                                                      provenance,
-                                                      sequencing_tech
-                                                     )
+        if many_type_name == 'SingleEndLibrary':
+            
+            # create SingleEndLibrary with output
+            #
+            self.log(console,"UPLOADING RESULTS")  # DEBUG
+            self.upload_SingleEndLibrary_to_shock_and_ws (ctx,
+                                                          console,  # DEBUG
+                                                          params['workspace_name'],
+                                                          params['output_filtered_name'],
+                                                          output_filtered_fasta_file_path,
+                                                          provenance,
+                                                          sequencing_tech
+                                                         )
+        else:
+            
+            # create FeatureSet
+            #
+
+            # HERE
+
         # build output report object
         #
         self.log(console,"BUILDING REPORT")  # DEBUG
