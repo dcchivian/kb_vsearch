@@ -572,11 +572,15 @@ class kb_vsearch:
         
 
         self.log(console, 'EXTRACTING HITS FROM INPUT')
+        self.log(console, 'MANY_TYPE_NAME: '+many_type_name)  # DEBUG
 
 
         # SinleEndLibrary input -> SingleEndLibrary output
         #
         if many_type_name == 'SingleEndLibrary':
+
+            self.log(console, 'WHAT AM I DOING HERE?)  # DEBUG
+
             #  Note: don't use SeqIO.parse because loads everything into memory
             #
 #            with open(many_forward_reads_file_path, 'r', -1) as many_forward_reads_file_handle, open(output_filtered_fasta_file_path, 'w', -1) as output_filtered_fasta_file_handle:
@@ -640,6 +644,7 @@ class kb_vsearch:
             if filtered_seq_total != hit_total:
                 self.log(console,'hits in VSearch alignment output '+str(hit_total)+' != '+str(filtered_seq_total)+' matched sequences in input file')
                 raise ValueError('hits in VSearch alignment output '+str(hit_total)+' != '+str(filtered_seq_total)+' matched sequences in input file')
+
 
         # FeatureSet input -> FeatureSet output
         #
