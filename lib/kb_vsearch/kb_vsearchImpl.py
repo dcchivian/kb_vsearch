@@ -601,7 +601,7 @@ class kb_vsearch:
                     seq_total += 1
                     seq_id = line[1:]
                     if "\n" in seq_id:
-                    seq_id = seq_id[0:seq_id.find("\n")+1]
+                        seq_id = seq_id[0:seq_id.find("\n")+1]
                     if "\t" in seq_id:
                         seq_id = seq_id[0:seq_id.find("\t")+1]
                     if " " in seq_id:
@@ -623,6 +623,7 @@ class kb_vsearch:
                     last_header = line
                 else:
                     last_seq_buf.append(line)
+
             if last_seq_id != None:
                 #self.log(console, 'ID: '+last_seq_id)  # DEBUG
                 try:
