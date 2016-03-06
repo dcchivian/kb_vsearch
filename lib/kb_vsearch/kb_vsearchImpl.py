@@ -579,7 +579,7 @@ class kb_vsearch:
         #
         if many_type_name == 'SingleEndLibrary':
 
-            self.log(console, 'WHAT AM I DOING HERE?)  # DEBUG
+            self.log(console, 'WHAT AM I DOING HERE?')  # DEBUG
 
             #  Note: don't use SeqIO.parse because loads everything into memory
             #
