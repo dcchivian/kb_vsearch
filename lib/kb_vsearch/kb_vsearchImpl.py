@@ -323,10 +323,10 @@ class kb_vsearch:
 
             elif one_type_name == 'FeatureSet':
                 # retrieve sequences for features
-                featureSet = data
+                input_one_featureSet = data
 
                 genome2Features = {}
-                features = featureSet['elements']
+                features = input_one_featureSet['elements']
                 for fId in features.keys():
                     genomeRef = features[fId][0]
                     if genomeRef not in genome2Features:
@@ -429,10 +429,10 @@ class kb_vsearch:
 
         elif many_type_name == 'FeatureSet':
             # retrieve sequences for features
-            featureSet = data
+            input_many_featureSet = data
 
             genome2Features = {}
-            features = featureSet['elements']
+            features = input_many_featureSet['elements']
             for fId in features.keys():
                 genomeRef = features[fId][0]
                 if genomeRef not in genome2Features:
@@ -571,107 +571,110 @@ class kb_vsearch:
                 self.log(console, 'HIT: '+hit_seq_id)  # DEBUG
         
 
-        # Filter many set and make filtered output file
-        #
-        #  Note: don't use SeqIO.parse because loads everything into memory
-        #
-        self.log(console, 'FILTERING OUT HITS')
+        self.log(console, 'EXTRACTING HITS FROM INPUT')
 
+
+        # SinleEndLibrary input -> SingleEndLibrary output
+        #
+        if many_type_name == 'SingleEndLibrary':
+            #  Note: don't use SeqIO.parse because loads everything into memory
+            #
 #            with open(many_forward_reads_file_path, 'r', -1) as many_forward_reads_file_handle, open(output_filtered_fasta_file_path, 'w', -1) as output_filtered_fasta_file_handle:
-        output_filtered_fasta_file_handle = open(output_filtered_fasta_file_path, 'w', -1)
-        if many_forward_reads_file_compression == 'gz':
-            many_forward_reads_file_handle = gzip.open(many_forward_reads_file_path, 'r', -1)
-        else:
-            many_forward_reads_file_handle = open(many_forward_reads_file_path, 'r', -1)
-
-        seq_total = 0;
-        filtered_seq_total = 0
-        last_seq_buf = []
-        last_seq_id = None
-        last_header = None
-        for line in many_forward_reads_file_handle:
-            if line.startswith('>'):
-                #self.log(console, 'LINE: '+line)  # DEBUG
-                seq_total += 1
-                seq_id = line[1:]
-                if "\n" in seq_id:
-                    seq_id = seq_id[0:seq_id.find("\n")+1]
-                if "\t" in seq_id:
-                    seq_id = seq_id[0:seq_id.find("\t")+1]
-                if " " in seq_id:
-                    seq_id = seq_id[0:seq_id.find(" ")+1]
-                    
-                if last_seq_id != None:
-                    #self.log(console, 'ID: '+last_seq_id)  # DEBUG
-                    try:
-                        in_filtered_set = hit_seq_ids[last_seq_id]
-                        #self.log(console, 'FOUND HIT '+last_seq_id)  # DEBUG
-                        filtered_seq_total += 1
-                        output_filtered_fasta_file_handle.write(last_header)
-                        output_filtered_fasta_file_handle.writelines(last_seq_buf)
-                    except:
-                        pass
-                        
-                last_seq_buf = []
-                last_seq_id = seq_id
-                last_header = line
+            output_filtered_fasta_file_handle = open(output_filtered_fasta_file_path, 'w', -1)
+            if many_forward_reads_file_compression == 'gz':
+                many_forward_reads_file_handle = gzip.open(many_forward_reads_file_path, 'r', -1)
             else:
-                last_seq_buf.append(line)
-        if last_seq_id != None:
-            #self.log(console, 'ID: '+last_seq_id)  # DEBUG
-            try:
-                in_filtered_set = hit_seq_ids[last_seq_id]
-                #self.log(console, 'FOUND HIT: '+last_seq_id)  # DEBUG
-                filtered_seq_total += 1
-                output_filtered_fasta_file_handle.write(last_header)
-                output_filtered_fasta_file_handle.writelines(last_seq_buf)
-            except:
-                pass
+                many_forward_reads_file_handle = open(many_forward_reads_file_path, 'r', -1)
+
+            seq_total = 0;
+            filtered_seq_total = 0
+            last_seq_buf = []
+            last_seq_id = None
+            last_header = None
+            for line in many_forward_reads_file_handle:
+                if line.startswith('>'):
+                    #self.log(console, 'LINE: '+line)  # DEBUG
+                    seq_total += 1
+                    seq_id = line[1:]
+                    if "\n" in seq_id:
+                    seq_id = seq_id[0:seq_id.find("\n")+1]
+                    if "\t" in seq_id:
+                        seq_id = seq_id[0:seq_id.find("\t")+1]
+                    if " " in seq_id:
+                        seq_id = seq_id[0:seq_id.find(" ")+1]
+                    
+                    if last_seq_id != None:
+                        #self.log(console, 'ID: '+last_seq_id)  # DEBUG
+                        try:
+                            in_filtered_set = hit_seq_ids[last_seq_id]
+                            #self.log(console, 'FOUND HIT '+last_seq_id)  # DEBUG
+                            filtered_seq_total += 1
+                            output_filtered_fasta_file_handle.write(last_header)
+                            output_filtered_fasta_file_handle.writelines(last_seq_buf)
+                        except:
+                            pass
+                        
+                    last_seq_buf = []
+                    last_seq_id = seq_id
+                    last_header = line
+                else:
+                    last_seq_buf.append(line)
+            if last_seq_id != None:
+                #self.log(console, 'ID: '+last_seq_id)  # DEBUG
+                try:
+                    in_filtered_set = hit_seq_ids[last_seq_id]
+                    #self.log(console, 'FOUND HIT: '+last_seq_id)  # DEBUG
+                    filtered_seq_total += 1
+                    output_filtered_fasta_file_handle.write(last_header)
+                    output_filtered_fasta_file_handle.writelines(last_seq_buf)
+                except:
+                    pass
                 
             last_seq_buf = []
             last_seq_id = None
             last_header = None
 
-        many_forward_reads_file_handle.close()
-        output_filtered_fasta_file_handle.close()
+            many_forward_reads_file_handle.close()
+            output_filtered_fasta_file_handle.close()
 
-        if filtered_seq_total != hit_total:
-            self.log(console,'hits in VSearch alignment output '+str(hit_total)+' != '+str(filtered_seq_total)+' matched sequences in input file')
-            raise ValueError('hits in VSearch alignment output '+str(hit_total)+' != '+str(filtered_seq_total)+' matched sequences in input file')
+            if filtered_seq_total != hit_total:
+                self.log(console,'hits in VSearch alignment output '+str(hit_total)+' != '+str(filtered_seq_total)+' matched sequences in input file')
+                raise ValueError('hits in VSearch alignment output '+str(hit_total)+' != '+str(filtered_seq_total)+' matched sequences in input file')
 
-
-        #elif many_type_name == 'FeatureSet' \
-        #    or many_type_name == 'Genome' \
-        #    or many_type_name == 'GenomeSet':
+        # FeatureSet input -> FeatureSet output
         #
-        #    # build a feature set
+        elif many_type_name == 'FeatureSet':
+            output_featureSet = dict()
+            output_featureSet['description'] = input_many_featureSet['description'] + " - VSearch_BasicSearch filtered"
+            output_featureSet['element_ordering'] = []
+            output_featureSet['elements'] = dict()
+            if 'element_ordering' in input_many_featureSet:
+                for fId in input_many_featureSet['element_ordering']:
+                    try:
+                        in_filtered_set = hit_seq_ids[fId]
+                        self.log(console, 'FOUND HIT '+fId)  # DEBUG
+                        output_featureSet['element_ordering'].append(fId)
+                        output_featureSet['elements'][fId] = input_many_featureSet['elements'][fId]
+                    except:
+                        pass
+            else:
+                for fId in input_many_featureSet['elements'].keys().sort():
+                    try:
+                        in_filtered_set = hit_seq_ids[fId]
+                        self.log(console, 'FOUND HIT '+fId)  # DEBUG
+                        output_featureSet['element_ordering'].append(fId)
+                        output_featureSet['elements'][fId] = input_many_featureSet['elements'][fId]
+                    except:
+                        pass
 
-        # Warning: this reads everything into memory!  Will not work if 
-        # the output is very large!
-        """
-        contigset_data = {
-            'id':'megahit.contigset',
-            'source':'User assembled contigs from reads in KBase',
-            'source_id':'none',
-            'md5': 'md5 of what? concat seq? concat md5s?',
-            'contigs':[]
-        }
+        #    elif many_type_name == 'Genome' \
+        #    elif many_type_name == 'GenomeSet':
+        #
 
-        lengths = []
-        for seq_record in SeqIO.parse(output_contigs, 'fasta'):
-            contig = {
-                'id':seq_record.id,
-                'name':seq_record.name,
-                'description':seq_record.description,
-                'length':len(seq_record.seq),
-                'sequence':str(seq_record.seq),
-                'md5':hashlib.md5(str(seq_record.seq)).hexdigest()
-            }
-            lengths.append(contig['length'])
-            contigset_data['contigs'].append(contig)
-        """
+
 
         # load the method provenance from the context object
+        #
         self.log(console,"SETTING PROVENANCE")  # DEBUG
         provenance = [{}]
         if 'provenance' in ctx:
@@ -685,11 +688,14 @@ class kb_vsearch:
         provenance[0]['method'] = 'VSearch_BasicSearch'
 
 
+        # Upload results
+        #
+        self.log(console,"UPLOADING RESULTS")  # DEBUG
+
         if many_type_name == 'SingleEndLibrary':
             
-            # create SingleEndLibrary with output
+            # input SingleEndLibrary -> upload SingleEndLibrary
             #
-            self.log(console,"UPLOADING RESULTS")  # DEBUG
             self.upload_SingleEndLibrary_to_shock_and_ws (ctx,
                                                           console,  # DEBUG
                                                           params['workspace_name'],
@@ -698,12 +704,18 @@ class kb_vsearch:
                                                           provenance,
                                                           sequencing_tech
                                                          )
-        else:
-            
-            # create FeatureSet
-            #
 
-            # HERE
+        else:  # input FeatureSet, Genome, and GenomeSet -> upload FeatureSet output
+            new_obj_info = ws.save_objects({
+                            'workspace': params['workspace_name'],
+                            'objects':[{
+                                    'type': 'KBaseCollections.FeatureSet',
+                                    'data': output_featureSet,
+                                    'name': params['output_filtered_name'],
+                                    'meta': {},
+                                    'provenance': provenance
+                                }]
+                        })
 
         # build output report object
         #
