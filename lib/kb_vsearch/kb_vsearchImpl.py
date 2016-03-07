@@ -467,7 +467,7 @@ class kb_vsearch:
             records = []
             for feature in input_many_genome['features']:
                 #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
-                record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
+                record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=input_many_genome['id'])
                 records.append(record)
             SeqIO.write(records, many_forward_reads_file_path, "fasta")
 
