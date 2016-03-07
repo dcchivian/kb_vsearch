@@ -649,7 +649,7 @@ class kb_vsearch:
         #
         elif many_type_name == 'FeatureSet':
 
-            for k in ['description', 'element_ordering', 'elements']:
+            for k in input_many_featureSet.keys():
                 self.log (console,"INPUT_MANY_FEATURESET['"+k+"'] = "+str(input_many_featureSet[k]))
 
             output_featureSet = dict()
