@@ -730,7 +730,7 @@ class kb_vsearch:
         report += 'sequences in hit set:  '+str(hit_total)
 
         reportObj = {
-            'objects_created':[{'ref':params['workspace_name']+'/'+params['output_filtered_name'], 'description':'SingleEndLibrary VSearch_BasicSearch hits'}],
+            'objects_created':[{'ref':params['workspace_name']+'/'+params['output_filtered_name'], 'description':'VSearch_BasicSearch hits'}],
             'text_message':report
         }
 
@@ -751,9 +751,12 @@ class kb_vsearch:
             })[0]
 
         self.log(console,"BUILDING RETURN OBJECT")
-        returnVal = { 'output_report_name': reportName,
-                      'output_report_ref': str(report_obj_info[6]) + '/' + str(report_obj_info[0]) + '/' + str(report_obj_info[4]),
-                      'output_filtered_ref': params['workspace_name']+'/'+params['output_filtered_name']
+#        returnVal = { 'output_report_name': reportName,
+#                      'output_report_ref': str(report_obj_info[6]) + '/' + str(report_obj_info[0]) + '/' + str(report_obj_info[4]),
+#                      'output_filtered_ref': params['workspace_name']+'/'+params['output_filtered_name']
+#                      }
+        returnVal = { 'report_name': reportName,
+                      'report_ref': str(report_obj_info[6]) + '/' + str(report_obj_info[0]) + '/' + str(report_obj_info[4]),
                       }
         self.log(console,"VSearch_BasicSearch DONE")
 
