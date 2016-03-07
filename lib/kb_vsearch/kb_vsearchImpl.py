@@ -669,7 +669,7 @@ class kb_vsearch:
                     except:
                         pass
             else:
-                for fId in input_many_featureSet['elements'].sort():
+                for fId in input_many_featureSet['elements'].keys():
                     try:
                         in_filtered_set = hit_seq_ids[fId]
                         self.log(console, 'FOUND HIT '+fId)  # DEBUG
