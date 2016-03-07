@@ -448,7 +448,7 @@ class kb_vsearch:
                 these_genomeFeatureIds = genome2Features[genomeRef]
                 for feature in genome['features']:
                     if feature['id'] in these_genomeFeatureIds:
-                        self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
+                        #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
                         record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
                         records.append(record)
             SeqIO.write(records, many_forward_reads_file_path, "fasta")
@@ -562,11 +562,11 @@ class kb_vsearch:
                 #self.log(console,'HIT LINE: '+line)  # DEBUG
                 hit_total += 1
                 hit_seq_id = line[7:]  # removes leading '>'
-                if "\n" in hit_seq_id:
+                while "\n" in hit_seq_id:
                     hit_seq_id = hit_seq_id[0:hit_seq_id.find("\n")+1]
-                if "\t" in hit_seq_id:
+                while "\t" in hit_seq_id:
                     hit_seq_id = hit_seq_id[0:hit_seq_id.find("\t")+1]
-                if " " in hit_seq_id:
+                while " " in hit_seq_id:
                     hit_seq_id = hit_seq_id[0:hit_seq_id.find(" ")+1]
                 hit_seq_ids[hit_seq_id] = True
                 self.log(console, "HIT: '"+hit_seq_id+"'")  # DEBUG
