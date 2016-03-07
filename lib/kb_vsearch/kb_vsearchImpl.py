@@ -564,6 +564,8 @@ class kb_vsearch:
                 hit_seq_id = line[7:]  # removes leading 'Query >'
                 if "\n" in hit_seq_id:
                     hit_seq_id = hit_seq_id[0:hit_seq_id.index("\n")+1]
+                if "\r" in hit_seq_id:
+                    hit_seq_id = hit_seq_id[0:hit_seq_id.index("\r")+1]
                 if "\t" in hit_seq_id:
                     hit_seq_id = hit_seq_id[0:hit_seq_id.index("\t")+1]
                 if " " in hit_seq_id:
@@ -601,6 +603,8 @@ class kb_vsearch:
                     seq_id = line[1:]
                     if "\n" in seq_id:
                         seq_id = seq_id[0:seq_id.index("\n")+1]
+                    if "\r" in seq_id:
+                        seq_id = seq_id[0:seq_id.index("\r")+1]
                     if "\t" in seq_id:
                         seq_id = seq_id[0:seq_id.index("\t")+1]
                     if " " in seq_id:
