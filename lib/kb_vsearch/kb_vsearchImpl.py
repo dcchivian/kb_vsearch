@@ -568,7 +568,7 @@ class kb_vsearch:
                 if " " in hit_seq_id:
                     hit_seq_id = hit_seq_id[0:hit_seq_id.find(" ")+1]
                 hit_seq_ids[hit_seq_id] = True
-                self.log(console, 'HIT: '+hit_seq_id)  # DEBUG
+                self.log(console, "HIT: '"+hit_seq_id+"'")  # DEBUG
         
 
         self.log(console, 'EXTRACTING HITS FROM INPUT')
@@ -671,9 +671,8 @@ class kb_vsearch:
                 fId_list = input_many_featureSet['elements'].keys()
                 self.log(console,"ADDING FEATURES TO FEATURESET")
                 for fId in sorted(fId_list):
-                    self.log(console,"feature: "+fId)
                     try:
-                        self.log(console,"checking "+fId)
+                        self.log(console,"checking '"+fId+"'")
                         in_filtered_set = hit_seq_ids[fId]
                         self.log(console, 'FOUND HIT '+fId)  # DEBUG
                         output_featureSet['element_ordering'].append(fId)
