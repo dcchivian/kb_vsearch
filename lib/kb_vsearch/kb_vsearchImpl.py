@@ -459,7 +459,7 @@ class kb_vsearch:
         #
         elif many_type_name == 'Genome':
             input_many_genome = data
-            input_many_genome_ref = info[6] + '/' + info[0] + '/' + info[4]
+            input_many_genome_ref = str(info[6])+'/'+str(info[0])+'/'+str(info[4])
 
             # export features to FASTA file
             many_forward_reads_file_path = os.path.join(self.scratch, params['input_many_name']+".fasta")
