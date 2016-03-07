@@ -44,13 +44,14 @@ module kb_vsearch {
     /* VSearch BasicSearch Output
     */
     typedef structure {
-	data_obj_name output_report_name;
-	data_obj_ref  output_report_ref;
-        data_obj_ref  output_filtered_ref;
-
-        int n_initial_seqs;
-        int n_seqs_matched;
-        int n_seqs_notmatched;
+	data_obj_name report_name;
+	data_obj_ref  report_ref;
+/*       data_obj_ref  output_filtered_ref;
+*
+*        int n_initial_seqs;
+*        int n_seqs_matched;
+*        int n_seqs_notmatched;
+*/
     } VSearch_BasicSearch_Output;
 	
 
