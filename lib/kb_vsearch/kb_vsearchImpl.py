@@ -561,13 +561,13 @@ class kb_vsearch:
             if line.startswith('Query >'):
                 #self.log(console,'HIT LINE: '+line)  # DEBUG
                 hit_total += 1
-                hit_seq_id = line[7:]  # removes leading '>'
-                while "\n" in hit_seq_id:
-                    hit_seq_id = hit_seq_id[0:hit_seq_id.find("\n")+1]
-                while "\t" in hit_seq_id:
-                    hit_seq_id = hit_seq_id[0:hit_seq_id.find("\t")+1]
-                while " " in hit_seq_id:
-                    hit_seq_id = hit_seq_id[0:hit_seq_id.find(" ")+1]
+                hit_seq_id = line[7:]  # removes leading 'Query >'
+                if "\n" in hit_seq_id:
+                    hit_seq_id = hit_seq_id[0:hit_seq_id.index("\n")+1]
+                if "\t" in hit_seq_id:
+                    hit_seq_id = hit_seq_id[0:hit_seq_id.index("\t")+1]
+                if " " in hit_seq_id:
+                    hit_seq_id = hit_seq_id[0:hit_seq_id.index(" ")+1]
                 hit_seq_ids[hit_seq_id] = True
                 self.log(console, "HIT: '"+hit_seq_id+"'")  # DEBUG
         
@@ -600,11 +600,11 @@ class kb_vsearch:
                     seq_total += 1
                     seq_id = line[1:]
                     if "\n" in seq_id:
-                        seq_id = seq_id[0:seq_id.find("\n")+1]
+                        seq_id = seq_id[0:seq_id.index("\n")+1]
                     if "\t" in seq_id:
-                        seq_id = seq_id[0:seq_id.find("\t")+1]
+                        seq_id = seq_id[0:seq_id.index("\t")+1]
                     if " " in seq_id:
-                        seq_id = seq_id[0:seq_id.find(" ")+1]
+                        seq_id = seq_id[0:seq_id.index(" ")+1]
                     
                     if last_seq_id != None:
                         #self.log(console, 'ID: '+last_seq_id)  # DEBUG
