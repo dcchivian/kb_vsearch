@@ -736,7 +736,8 @@ class kb_vsearch:
 
         reportName = 'vsearch_report_'+str(hex(uuid.getnode()))
         report_obj_info = ws.save_objects({
-                'id':info[6],
+#                'id':info[6],
+                'workspace':params['workspace_name'],
                 'objects':[
                     {
                         'type':'KBaseReport.Report',
