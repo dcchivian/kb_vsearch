@@ -485,7 +485,7 @@ class kb_vsearch:
             for genome_name in input_many_genomeSet['elements'].keys():
                 if 'ref' in input_many_genomeSet['elements'][genome_name] and \
                          input_many_genomeSet['elements'][genome_name]['ref'] != None:
-                    genome = ws.get_objects([{'ref': params['workspace_name']+'/'+params['input_one_name']}])[0]['data']
+                    genome = ws.get_objects([{'ref': input_many_genomeSet['elements'][genome_name]['ref']}])[0]['data']
                     for feature in genome['features']:
                         #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
                         record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=input_many_genome['id'])
