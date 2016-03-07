@@ -669,8 +669,11 @@ class kb_vsearch:
                         pass
             else:
                 fId_list = input_many_featureSet['elements'].keys()
+                self.log(console,"ADDING FEATURES TO FEATURESET")
                 for fId in sorted(fId_list):
+                    self.log(console,"feature: "+fId)
                     try:
+                        self.log(console,"checking "+fId)
                         in_filtered_set = hit_seq_ids[fId]
                         self.log(console, 'FOUND HIT '+fId)  # DEBUG
                         output_featureSet['element_ordering'].append(fId)
