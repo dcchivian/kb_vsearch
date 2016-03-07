@@ -448,7 +448,8 @@ class kb_vsearch:
                 these_genomeFeatureIds = genome2Features[genomeRef]
                 for feature in genome['features']:
                     if feature['id'] in these_genomeFeatureIds:
-                        record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=feature['id'])
+                        self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
+                        record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
                         records.append(record)
             SeqIO.write(records, many_forward_reads_file_path, "fasta")
 
