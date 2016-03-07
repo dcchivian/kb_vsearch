@@ -649,8 +649,7 @@ class kb_vsearch:
         #
         elif many_type_name == 'FeatureSet':
 
-            for k in input_many_featureSet.keys():
-                self.log (console,"INPUT_MANY_FEATURESET['"+k+"'] = "+str(input_many_featureSet[k]))
+            seq_total = len(input_many_featureSet['elements'].keys())
 
             output_featureSet = dict()
             if 'description' in input_many_featureSet and input_many_featureSet['description'] != None:
@@ -669,7 +668,8 @@ class kb_vsearch:
                     except:
                         pass
             else:
-                for fId in input_many_featureSet['elements'].keys():
+                fId_list = input_many_featureSet['elements'].keys()
+                for fId in fId_list.sort():
                     try:
                         in_filtered_set = hit_seq_ids[fId]
                         self.log(console, 'FOUND HIT '+fId)  # DEBUG
