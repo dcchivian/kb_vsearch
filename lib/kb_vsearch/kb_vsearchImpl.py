@@ -220,7 +220,6 @@ class kb_vsearch:
         #END_CONSTRUCTOR
         pass
 
-
     def VSearch_BasicSearch(self, ctx, params):
         # ctx is the context object
         # return variables are: returnVal

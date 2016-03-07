@@ -142,12 +142,8 @@ workspace_name is a string
 sequence is a string
 data_obj_name is a string
 VSearch_BasicSearch_Output is a reference to a hash where the following keys are defined:
-	output_report_name has a value which is a kb_vsearch.data_obj_name
-	output_report_ref has a value which is a kb_vsearch.data_obj_ref
-	output_filtered_ref has a value which is a kb_vsearch.data_obj_ref
-	n_initial_seqs has a value which is an int
-	n_seqs_matched has a value which is an int
-	n_seqs_notmatched has a value which is an int
+	report_name has a value which is a kb_vsearch.data_obj_name
+	report_ref has a value which is a kb_vsearch.data_obj_ref
 data_obj_ref is a string
 
 </pre>
@@ -174,12 +170,8 @@ workspace_name is a string
 sequence is a string
 data_obj_name is a string
 VSearch_BasicSearch_Output is a reference to a hash where the following keys are defined:
-	output_report_name has a value which is a kb_vsearch.data_obj_name
-	output_report_ref has a value which is a kb_vsearch.data_obj_ref
-	output_filtered_ref has a value which is a kb_vsearch.data_obj_ref
-	n_initial_seqs has a value which is an int
-	n_seqs_matched has a value which is an int
-	n_seqs_notmatched has a value which is an int
+	report_name has a value which is a kb_vsearch.data_obj_name
+	report_ref has a value which is a kb_vsearch.data_obj_ref
 data_obj_ref is a string
 
 
@@ -489,12 +481,8 @@ VSearch BasicSearch Output
 
 <pre>
 a reference to a hash where the following keys are defined:
-output_report_name has a value which is a kb_vsearch.data_obj_name
-output_report_ref has a value which is a kb_vsearch.data_obj_ref
-output_filtered_ref has a value which is a kb_vsearch.data_obj_ref
-n_initial_seqs has a value which is an int
-n_seqs_matched has a value which is an int
-n_seqs_notmatched has a value which is an int
+report_name has a value which is a kb_vsearch.data_obj_name
+report_ref has a value which is a kb_vsearch.data_obj_ref
 
 </pre>
 
@@ -503,12 +491,8 @@ n_seqs_notmatched has a value which is an int
 =begin text
 
 a reference to a hash where the following keys are defined:
-output_report_name has a value which is a kb_vsearch.data_obj_name
-output_report_ref has a value which is a kb_vsearch.data_obj_ref
-output_filtered_ref has a value which is a kb_vsearch.data_obj_ref
-n_initial_seqs has a value which is an int
-n_seqs_matched has a value which is an int
-n_seqs_notmatched has a value which is an int
+report_name has a value which is a kb_vsearch.data_obj_name
+report_ref has a value which is a kb_vsearch.data_obj_ref
 
 
 =end text
