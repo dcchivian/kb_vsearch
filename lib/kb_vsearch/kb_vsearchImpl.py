@@ -426,6 +426,8 @@ class kb_vsearch:
                 print(traceback.format_exc())
                 raise ValueError('Unable to download single-end read library files: ' + str(e))
 
+        # FeatureSet
+        #
         elif many_type_name == 'FeatureSet':
             # retrieve sequences for features
             input_many_featureSet = data
@@ -452,8 +454,23 @@ class kb_vsearch:
                         records.append(record)
             SeqIO.write(records, many_forward_reads_file_path, "fasta")
 
-        #elif many_type_name == 'Genome':
-        #    # retrieve sequences for features
+
+        # Genome
+        #
+        elif many_type_name == 'Genome':
+            input_many_genome = data
+            input_many_genome_ref = info[6] + '/' + info[0] + '/' + info[4]
+
+            # export features to FASTA file
+            many_forward_reads_file_path = os.path.join(self.scratch, params['input_many_name']+".fasta")
+            self.log(console, 'writing fasta file: '+many_forward_reads_file_path)
+            records = []
+            for feature in input_many_genome['features']:
+                #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
+                record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
+                records.append(record)
+            SeqIO.write(records, many_forward_reads_file_path, "fasta")
+
 
         #elif many_type_name == 'GenomeSet':
         #    # retrieve sequences for features
@@ -654,7 +671,7 @@ class kb_vsearch:
                 for fId in input_many_featureSet['element_ordering']:
                     try:
                         in_filtered_set = hit_seq_ids[fId]
-                        self.log(console, 'FOUND HIT '+fId)  # DEBUG
+                        #self.log(console, 'FOUND HIT '+fId)  # DEBUG
                         output_featureSet['element_ordering'].append(fId)
                         output_featureSet['elements'][fId] = input_many_featureSet['elements'][fId]
                     except:
@@ -664,7 +681,7 @@ class kb_vsearch:
                 self.log(console,"ADDING FEATURES TO FEATURESET")
                 for fId in sorted(fId_list):
                     try:
-                        self.log(console,"checking '"+fId+"'")
+                        #self.log(console,"checking '"+fId+"'")
                         in_filtered_set = hit_seq_ids[fId]
                         self.log(console, 'FOUND HIT '+fId)  # DEBUG
                         output_featureSet['element_ordering'].append(fId)
@@ -672,7 +689,28 @@ class kb_vsearch:
                     except:
                         pass
 
-        #    elif many_type_name == 'Genome' \
+        # Parse Genome hits into FeatureSet
+        #
+        elif many_type_name == 'Genome':
+            seq_total = 0
+
+            output_featureSet = dict()
+            if 'scientific_name' in input_many_genome and input_many_genome['scientific_name'] != None:
+                output_featureSet['description'] = input_many_genome['scientific_name'] + " - VSearch_BasicSearch filtered"
+            else:
+                output_featureSet['description'] = "VSearch_BasicSearch filtered"
+            output_featureSet['element_ordering'] = []
+            output_featureSet['elements'] = dict()
+            for feature in input_many_genome['features']:
+                seq_total += 1
+                try:
+                    in_filtered_set = hit_seq_ids[feature['id']]
+                    self.log(console, 'FOUND HIT '+feature['id'])  # DEBUG
+                    output_featureSet['element_ordering'].append(feature['id'])
+                    output_featureSet['elements'][feature['id']] = [input_many_genome_ref]
+                except:
+                    pass
+
         #    elif many_type_name == 'GenomeSet':
         #
 
