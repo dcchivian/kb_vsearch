@@ -564,14 +564,6 @@ class kb_vsearch:
                 hit_total += 1
                 hit_seq_id = line[7:]  # removes leading 'Query >'
                 hit_seq_id = pattern.findall(hit_seq_id)[0]
-#                if "\n" in hit_seq_id:
-#                    hit_seq_id = hit_seq_id[0:hit_seq_id.index("\n")+1]
-#                if "\r" in hit_seq_id:
-#                    hit_seq_id = hit_seq_id[0:hit_seq_id.index("\r")+1]
-#                if "\t" in hit_seq_id:
-#                    hit_seq_id = hit_seq_id[0:hit_seq_id.index("\t")+1]
-#                if " " in hit_seq_id:
-#                    hit_seq_id = hit_seq_id[0:hit_seq_id.index(" ")+1]
                 hit_seq_ids[hit_seq_id] = True
                 self.log(console, "HIT: '"+hit_seq_id+"'")  # DEBUG
         
@@ -598,20 +590,14 @@ class kb_vsearch:
             last_seq_buf = []
             last_seq_id = None
             last_header = None
+            pattern = re.compile('^\S*')
             for line in many_forward_reads_file_handle:
                 if line.startswith('>'):
                     #self.log(console, 'LINE: '+line)  # DEBUG
                     seq_total += 1
-                    seq_id = line[1:]
-                    if "\n" in seq_id:
-                        seq_id = seq_id[0:seq_id.index("\n")+1]
-                    if "\r" in seq_id:
-                        seq_id = seq_id[0:seq_id.index("\r")+1]
-                    if "\t" in seq_id:
-                        seq_id = seq_id[0:seq_id.index("\t")+1]
-                    if " " in seq_id:
-                        seq_id = seq_id[0:seq_id.index(" ")+1]
-                    
+                    seq_id = line[1:]  # removes '>'
+                    seq_id = pattern.findall(seq_id)[0]
+
                     if last_seq_id != None:
                         #self.log(console, 'ID: '+last_seq_id)  # DEBUG
                         try:
