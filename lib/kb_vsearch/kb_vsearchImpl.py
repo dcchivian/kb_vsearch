@@ -472,9 +472,40 @@ class kb_vsearch:
             SeqIO.write(records, many_forward_reads_file_path, "fasta")
 
 
-        #elif many_type_name == 'GenomeSet':
-        #    # retrieve sequences for features
+        # GenomeSet
+        #
+        elif many_type_name == 'GenomeSet':
+            input_many_genomeSet = data
 
+            # export features to FASTA file
+            many_forward_reads_file_path = os.path.join(self.scratch, params['input_many_name']+".fasta")
+            self.log(console, 'writing fasta file: '+many_forward_reads_file_path)
+
+            records = []
+            for genome_name in input_many_genomeSet['elements'].keys():
+                if 'ref' in input_many_genomeSet['elements'][genome_name] and \
+                         input_many_genomeSet['elements'][genome_name]['ref'] != None:
+                    genome = ws.get_objects([{'ref': params['workspace_name']+'/'+params['input_one_name']}])[0]['data']
+                    for feature in genome['features']:
+                        #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
+                        record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=input_many_genome['id'])
+                        records.append(record)
+
+                elif 'data' in input_many_genomeSet['elements'][genome_name] and \
+                        input_many_genomeSet['elements'][genome_name]['data'] != None:
+                    genome = input_many_genomeSet['elements'][genome_name]['data']
+                    for feature in genome['features']:
+                        #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
+                        record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=input_many_genome['id'])
+                        records.append(record)
+
+                else:
+                    raise ValueError('genome '+genome_name+' missing')
+
+            SeqIO.write(records, many_forward_reads_file_path, "fasta")
+            
+        # Missing proper input_many_type
+        #
         else:
             raise ValueError('Cannot yet handle input_many type of: '+type_name)            
 
@@ -711,9 +742,47 @@ class kb_vsearch:
                 except:
                     pass
 
-        #    elif many_type_name == 'GenomeSet':
+        # Parse GenomeSet hits into FeatureSet
         #
+        elif many_type_name == 'GenomeSet':
+            seq_total = 0
 
+            output_featureSet = dict()
+            if 'description' in input_many_genomeSet and input_many_genomeSet['description'] != None:
+                output_featureSet['description'] = input_many_genomeSet['description'] + " - VSearch_BasicSearch filtered"
+            else:
+                output_featureSet['description'] = "VSearch_BasicSearch filtered"
+            output_featureSet['element_ordering'] = []
+            output_featureSet['elements'] = dict()
+
+            for genome_name in input_many_genomeSet['elements'].keys():
+                if 'ref' in input_many_genomeSet['elements'][genome_name] and \
+                        input_many_genomeSet['elements'][genome_name]['ref'] != None:
+                    genomeRef = input_many_genomeSet['elements'][genome_name]['ref']
+                    genome = ws.get_objects([{'ref':genomeRef}])[0]['data']
+                    for feature in genome['features']:
+                        seq_total += 1
+                        try:
+                            in_filtered_set = hit_seq_ids[feature['id']]
+                            #self.log(console, 'FOUND HIT: '+feature['id'])  # DEBUG
+                            output_featureSet['element_ordering'].append(feature['id'])
+                            output_featureSet['elements'][feature['id']] = [input_many_genome_ref]
+                        except:
+                            pass
+
+                elif 'data' in input_many_genomeSet['elements'][genome_name] and \
+                        input_many_genomeSet['elements'][genome_name]['data'] != None:
+                    genome = input_many_genomeSet['elements'][genome_name]['data']
+                    for feature in genome['features']:
+                        #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
+                        seq_total += 1
+                        try:
+                            in_filtered_set = hit_seq_ids[feature['id']]
+                            #self.log(console, 'FOUND HIT: '+feature['id'])  # DEBUG
+                            output_featureSet['element_ordering'].append(feature['id'])
+                            output_featureSet['elements'][feature['id']] = [input_many_genome_ref]
+                        except:
+                            pass
 
 
         # load the method provenance from the context object
