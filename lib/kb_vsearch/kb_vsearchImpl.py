@@ -437,7 +437,7 @@ class kb_vsearch:
                 genomeRef = features[fId][0]
                 if genomeRef not in genome2Features:
                     genome2Features[genomeRef] = []
-                    genome2Features[genomeRef].append(fId)
+                genome2Features[genomeRef].append(fId)
 
             # export features to FASTA file
             many_forward_reads_file_path = os.path.join(self.scratch, params['input_many_name']+".fasta")
@@ -448,9 +448,9 @@ class kb_vsearch:
                 these_genomeFeatureIds = genome2Features[genomeRef]
                 for feature in genome['features']:
                     if feature['id'] in these_genomeFeatureIds:
-                        record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genomeRef+"."+feature['id'])
+                        record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=feature['id'])
                         records.append(record)
-                        SeqIO.write(records, many_forward_reads_file_path, "fasta")
+            SeqIO.write(records, many_forward_reads_file_path, "fasta")
 
         #elif many_type_name == 'Genome':
         #    # retrieve sequences for features
