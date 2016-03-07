@@ -556,20 +556,22 @@ class kb_vsearch:
         output_aln_buf = output_aln_file_handle.readlines()
         output_aln_file_handle.close()
         hit_total = 0
+        pattern = re.compile('^\S*')
         for line in output_aln_buf:
             # hits have lines of format 'Query >1367929'
             if line.startswith('Query >'):
                 #self.log(console,'HIT LINE: '+line)  # DEBUG
                 hit_total += 1
                 hit_seq_id = line[7:]  # removes leading 'Query >'
-                if "\n" in hit_seq_id:
-                    hit_seq_id = hit_seq_id[0:hit_seq_id.index("\n")+1]
-                if "\r" in hit_seq_id:
-                    hit_seq_id = hit_seq_id[0:hit_seq_id.index("\r")+1]
-                if "\t" in hit_seq_id:
-                    hit_seq_id = hit_seq_id[0:hit_seq_id.index("\t")+1]
-                if " " in hit_seq_id:
-                    hit_seq_id = hit_seq_id[0:hit_seq_id.index(" ")+1]
+                hit_seq_id = pattern.findall(hit_seq_id)[0]
+#                if "\n" in hit_seq_id:
+#                    hit_seq_id = hit_seq_id[0:hit_seq_id.index("\n")+1]
+#                if "\r" in hit_seq_id:
+#                    hit_seq_id = hit_seq_id[0:hit_seq_id.index("\r")+1]
+#                if "\t" in hit_seq_id:
+#                    hit_seq_id = hit_seq_id[0:hit_seq_id.index("\t")+1]
+#                if " " in hit_seq_id:
+#                    hit_seq_id = hit_seq_id[0:hit_seq_id.index(" ")+1]
                 hit_seq_ids[hit_seq_id] = True
                 self.log(console, "HIT: '"+hit_seq_id+"'")  # DEBUG
         
