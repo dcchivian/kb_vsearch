@@ -579,8 +579,6 @@ class kb_vsearch:
         #
         if many_type_name == 'SingleEndLibrary':
 
-            self.log(console, 'WHAT AM I DOING HERE?')  # DEBUG
-
             #  Note: don't use SeqIO.parse because loads everything into memory
             #
 #            with open(many_forward_reads_file_path, 'r', -1) as many_forward_reads_file_handle, open(output_filtered_fasta_file_path, 'w', -1) as output_filtered_fasta_file_handle:
@@ -650,6 +648,10 @@ class kb_vsearch:
         # FeatureSet input -> FeatureSet output
         #
         elif many_type_name == 'FeatureSet':
+
+            for k in ['description', 'element_ordering', 'elements']:
+                self.log (console,"INPUT_MANY_FEATURESET['"+k+"'] = "+str(input_many_featureSet[k]))
+
             output_featureSet = dict()
             if 'description' in input_many_featureSet and input_many_featureSet['description'] != None:
                 output_featureSet['description'] = input_many_featureSet['description'] + " - VSearch_BasicSearch filtered"
