@@ -659,7 +659,7 @@ class kb_vsearch:
                 output_featureSet['description'] = "VSearch_BasicSearch filtered"
             output_featureSet['element_ordering'] = []
             output_featureSet['elements'] = dict()
-            if 'element_ordering' in input_many_featureSet:
+            if 'element_ordering' in input_many_featureSet and input_many_featureSet['element_ordering'] != None:
                 for fId in input_many_featureSet['element_ordering']:
                     try:
                         in_filtered_set = hit_seq_ids[fId]
@@ -669,7 +669,7 @@ class kb_vsearch:
                     except:
                         pass
             else:
-                for fId in input_many_featureSet['elements'].keys().sort():
+                for fId in input_many_featureSet['elements']:
                     try:
                         in_filtered_set = hit_seq_ids[fId]
                         self.log(console, 'FOUND HIT '+fId)  # DEBUG
