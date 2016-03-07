@@ -683,7 +683,7 @@ class kb_vsearch:
                     try:
                         #self.log(console,"checking '"+fId+"'")
                         in_filtered_set = hit_seq_ids[fId]
-                        self.log(console, 'FOUND HIT '+fId)  # DEBUG
+                        #self.log(console, 'FOUND HIT '+fId)  # DEBUG
                         output_featureSet['element_ordering'].append(fId)
                         output_featureSet['elements'][fId] = input_many_featureSet['elements'][fId]
                     except:
@@ -705,7 +705,7 @@ class kb_vsearch:
                 seq_total += 1
                 try:
                     in_filtered_set = hit_seq_ids[feature['id']]
-                    self.log(console, 'FOUND HIT '+feature['id'])  # DEBUG
+                    #self.log(console, 'FOUND HIT: '+feature['id'])  # DEBUG
                     output_featureSet['element_ordering'].append(feature['id'])
                     output_featureSet['elements'][feature['id']] = [input_many_genome_ref]
                 except:
