@@ -249,7 +249,7 @@ class kb_vsearch:
         ##
         if 'input_one_sequence' in params \
                 and params['input_one_sequence'] != None \
-                and params['input_one_sequence'] != "Enter DNA sequence...":
+                and params['input_one_sequence'] != "Optionally enter DNA sequence...":
             input_one_file_name = params['input_one_name']
             one_forward_reads_file_path = os.path.join(self.scratch,input_one_file_name)
             one_forward_reads_file_handle = open(one_forward_reads_file_path, 'w', 0)
@@ -272,8 +272,8 @@ class kb_vsearch:
             if input_sequence_buf.startswith('@'):
                 fastq_format = True
                 #self.log(console,"INPUT_SEQ BEFORE: '''\n"+input_sequence_buf+"\n'''")  # DEBUG
-                input_sequence_buf = re.sub ('&apos;', "'", input_sequence_buf)
-                input_sequence_buf = re.sub ('&quot;', '"', input_sequence_buf)
+            input_sequence_buf = re.sub ('&apos;', "'", input_sequence_buf)
+            input_sequence_buf = re.sub ('&quot;', '"', input_sequence_buf)
 #        input_sequence_buf = re.sub ('&#39;',  "'", input_sequence_buf)
 #        input_sequence_buf = re.sub ('&#34;',  '"', input_sequence_buf)
 #        input_sequence_buf = re.sub ('&lt;;',  '<', input_sequence_buf)
@@ -291,78 +291,80 @@ class kb_vsearch:
 #        input_sequence_buf = re.sub ('&#38;', '&', input_sequence_buf)
 #        self.log(console,"INPUT_SEQ AFTER: '''\n"+input_sequence_buf+"\n'''")  # DEBUG
 
-                DNA_pattern = re.compile("^[acgtuACGTU ]+$")
-                space_pattern = re.compile("^[ \t]*$")
-                split_input_sequence_buf = input_sequence_buf.split("\n")
+            DNA_pattern = re.compile("^[acgtuACGTU ]+$")
+            space_pattern = re.compile("^[ \t]*$")
+            split_input_sequence_buf = input_sequence_buf.split("\n")
 
-                # no header rows, just sequence
-                if not input_sequence_buf.startswith('>') and not input_sequence_buf.startswith('@'):
-                    one_forward_reads_file_handle.write('>'+params['input_one_name']+"\n")
-                    for line in split_input_sequence_buf:
-                        if not space_pattern.match(line):
-                            line = re.sub (" ","",line)
-                            line = re.sub ("\t","",line)
-                            if not DNA_pattern.match(line):
-                                raise ValueError ("BAD record:\n"+line+"\n")
-                                sys.exit(0)
-                            one_forward_reads_file_handle.write(line.lower()+"\n")
+            # no header rows, just sequence
+            if not input_sequence_buf.startswith('>') and not input_sequence_buf.startswith('@'):
+                one_forward_reads_file_handle.write('>'+params['input_one_name']+"\n")
+                for line in split_input_sequence_buf:
+                    if not space_pattern.match(line):
+                        line = re.sub (" ","",line)
+                        line = re.sub ("\t","",line)
+                        if not DNA_pattern.match(line):
+                            raise ValueError ("BAD record:\n"+line+"\n")
+                            sys.exit(0)
+                        one_forward_reads_file_handle.write(line.lower()+"\n")
 
-                else:
-                    # format checks
-                    for i,line in enumerate(split_input_sequence_buf):
-                        if line.startswith('>') or line.startswith('@'):
-                            if not DNA_pattern.match(split_input_sequence_buf[i+1]):
-                                if fastq_format:
-                                    bad_record = "\n".join([split_input_sequence_buf[i],
+            else:
+                # format checks
+                for i,line in enumerate(split_input_sequence_buf):
+                    if line.startswith('>') or line.startswith('@'):
+                        if not DNA_pattern.match(split_input_sequence_buf[i+1]):
+                            if fastq_format:
+                                bad_record = "\n".join([split_input_sequence_buf[i],
+                                                        split_input_sequence_buf[i+1],
+                                                        split_input_sequence_buf[i+2],
+                                                        split_input_sequence_buf[i+3]])
+                            else:
+                                bad_record = "\n".join([split_input_sequence_buf[i],
+                                                    split_input_sequence_buf[i+1]])
+                            raise ValueError ("BAD record:\n"+bad_record+"\n")
+                            sys.exit(0)
+                        if fastq_format and line.startswith('@'):
+                            format_ok = True
+                            seq_len = len(split_input_sequence_buf[i+1])
+                            if not seq_len > 0:
+                                format_ok = False
+                            if not split_input_sequence_buf[i+2].startswith('+'):
+                                format_ok = False
+                            if not seq_len == len(split_input_sequence_buf[i+3]):
+                                format_ok = False
+                            if not format_ok:
+                                bad_record = "\n".join([split_input_sequence_buf[i],
                                                     split_input_sequence_buf[i+1],
                                                     split_input_sequence_buf[i+2],
                                                     split_input_sequence_buf[i+3]])
-                                else:
-                                    bad_record = "\n".join([split_input_sequence_buf[i],
-                                                    split_input_sequence_buf[i+1]])
                                 raise ValueError ("BAD record:\n"+bad_record+"\n")
                                 sys.exit(0)
-                            if fastq_format and line.startswith('@'):
-                                format_ok = True
-                                seq_len = len(split_input_sequence_buf[i+1])
-                                if not seq_len > 0:
-                                    format_ok = False
-                                if not split_input_sequence_buf[i+2].startswith('+'):
-                                    format_ok = False
-                                if not seq_len == len(split_input_sequence_buf[i+3]):
-                                    format_ok = False
-                                if not format_ok:
-                                    bad_record = "\n".join([split_input_sequence_buf[i],
-                                                    split_input_sequence_buf[i+1],
-                                                    split_input_sequence_buf[i+2],
-                                                    split_input_sequence_buf[i+3]])
-                                    raise ValueError ("BAD record:\n"+bad_record+"\n")
-                                    sys.exit(0)
 
-                    # write that sucker, removing spaces
-                    #
-                    #forward_reads_file_handle.write(input_sequence_buf)        input_sequence_buf = re.sub ('&quot;', '"', input_sequence_buf)
-                    for i,line in enumerate(split_input_sequence_buf):
-                        if line.startswith('>'):
-                            split_input_sequence_buf[i+1] = re.sub (" ","",split_input_sequence_buf[i+1])
-                            split_input_sequence_buf[i+1] = re.sub ("\t","",split_input_sequence_buf[i+1])
-                            record = "\n".join([split_input_sequence_buf[i], \
+                # write that sucker, removing spaces
+                #
+                #forward_reads_file_handle.write(input_sequence_buf)        input_sequence_buf = re.sub ('&quot;', '"', input_sequence_buf)
+                for i,line in enumerate(split_input_sequence_buf):
+                    if line.startswith('>'):
+                        split_input_sequence_buf[i+1] = re.sub (" ","",split_input_sequence_buf[i+1])
+                        split_input_sequence_buf[i+1] = re.sub ("\t","",split_input_sequence_buf[i+1])
+                        record = "\n".join([split_input_sequence_buf[i], \
                                         split_input_sequence_buf[i+1].lower()]) \
                                         + "\n"
 
-                            one_forward_reads_file_handle.write(record)
-                        elif line.startswith('@'):
-                            split_input_sequence_buf[i+1] = re.sub (" ","",split_input_sequence_buf[i+1])
-                            split_input_sequence_buf[i+1] = re.sub ("\t","",split_input_sequence_buf[i+1])
-                            split_input_sequence_buf[i+3] = re.sub (" ","",split_input_sequence_buf[i+3])
-                            split_input_sequence_buf[i+3] = re.sub ("\t","",split_input_sequence_buf[i+3])
-                            record = "\n".join([split_input_sequence_buf[i], \
+                        one_forward_reads_file_handle.write(record)
+                        break  # only want first record
+                    elif line.startswith('@'):
+                        split_input_sequence_buf[i+1] = re.sub (" ","",split_input_sequence_buf[i+1])
+                        split_input_sequence_buf[i+1] = re.sub ("\t","",split_input_sequence_buf[i+1])
+                        split_input_sequence_buf[i+3] = re.sub (" ","",split_input_sequence_buf[i+3])
+                        split_input_sequence_buf[i+3] = re.sub ("\t","",split_input_sequence_buf[i+3])
+                        record = "\n".join([split_input_sequence_buf[i], \
                                         split_input_sequence_buf[i+1].lower(), \
                                         split_input_sequence_buf[i+2], \
                                         split_input_sequence_buf[i+3]]) \
                                         + "\n"
-                            one_forward_reads_file_handle.write(record)
-        
+                        one_forward_reads_file_handle.write(record)
+                        break  # only want first record
+
             one_forward_reads_file_handle.close()
 
 
