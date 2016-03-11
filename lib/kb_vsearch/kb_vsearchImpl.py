@@ -974,6 +974,9 @@ class kb_vsearch:
             'objects_created':[{'ref':params['workspace_name']+'/'+params['output_filtered_name'], 'description':'VSearch_BasicSearch hits'}],
             'text_message':report
         }
+        if 'input_one_sequence' in params and params['input_one_sequence'] != None:
+            reportObj['objects_created'].append({'ref':params['workspace_name']+'/'+params['input_one_name'], 'description':'VSearch_BasicSearch query'})
+                
 
         reportName = 'vsearch_report_'+str(hex(uuid.getnode()))
         report_obj_info = ws.save_objects({
