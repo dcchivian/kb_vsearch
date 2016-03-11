@@ -463,10 +463,12 @@ class kb_vsearch:
                 last_header = None
                 last_seq_buf = None
                 last_line_was_header = False
+                was_fastq = False
                 for line in one_forward_reads_file_handle:
                     if line.startswith('>'):
                         break
                     elif line.startswith('@'):
+                        was_fastq = True
                         header = line[1:]
                         if last_header != None:
                             new_file_handle.write('>'+last_header)
@@ -485,7 +487,8 @@ class kb_vsearch:
 
                 new_file_handle.close()
                 one_forward_reads_file_handle.close()
-                one_forward_reads_file_path = new_file_path
+                if was_fastq:
+                    one_forward_reads_file_path = new_file_path
 
             except Exception as e:
                 print(traceback.format_exc())
@@ -602,10 +605,12 @@ class kb_vsearch:
                 last_header = None
                 last_seq_buf = None
                 last_line_was_header = False
+                was_fastq = False
                 for line in many_forward_reads_file_handle:
                     if line.startswith('>'):
                         break
                     elif line.startswith('@'):
+                        was_fastq = True
                         header = line[1:]
                         if last_header != None:
                             new_file_handle.write('>'+last_header)
@@ -624,7 +629,8 @@ class kb_vsearch:
 
                 new_file_handle.close()
                 many_forward_reads_file_handle.close()
-                many_forward_reads_file_path = new_file_path
+                if was_fastq:
+                    many_forward_reads_file_path = new_file_path
 
             except Exception as e:
                 print(traceback.format_exc())
