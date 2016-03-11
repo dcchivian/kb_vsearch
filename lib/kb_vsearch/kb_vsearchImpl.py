@@ -660,7 +660,10 @@ class kb_vsearch:
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         output_aln_file_path = os.path.join(output_dir, 'alnout.txt');
-        output_filtered_fasta_file_path = os.path.join(output_dir, 'output_filtered.fna');
+        file_extension = ''
+        if params['output_filtered_name'][-4:] != '.fna' and params['output_filtered_name'][-6:] != '.fasta' and params['output_filtered_name'][-6:] != '.fastq':
+            file_extension = '.fna'
+        output_filtered_fasta_file_path = os.path.join(output_dir, params['output_filtered_name']+file_extension);
 
         # this is command for basic search mode
         vsearch_cmd.append('--usearch_global')
