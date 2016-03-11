@@ -227,8 +227,9 @@ class kb_vsearch:
         console = []
         self.log(console,'Running VSearch_BasicSearch with params=')
         self.log(console, "\n"+pformat(params))
-        report = 'Running VSearch_BasicSearch with params='
-        report += "\n"+pformat(params)
+        report = ''
+#        report = 'Running VSearch_BasicSearch with params='
+#        report += "\n"+pformat(params)
 
 
         #### do some basic checks
@@ -704,8 +705,8 @@ class kb_vsearch:
         #
         self.log(console, 'RUNNING VSEARCH:')
         self.log(console, '    '+' '.join(vsearch_cmd))
-        report += "\n"+'running vsearch:'+"\n"
-        report += '    '+' '.join(vsearch_cmd)+"\n"
+#        report += "\n"+'running vsearch:'+"\n"
+#        report += '    '+' '.join(vsearch_cmd)+"\n"
 
         p = subprocess.Popen(vsearch_cmd, \
                              cwd = self.scratch, \
@@ -966,8 +967,8 @@ class kb_vsearch:
         # build output report object
         #
         self.log(console,"BUILDING REPORT")  # DEBUG
-        report += 'sequences in many set: '+str(seq_total)
-        report += 'sequences in hit set:  '+str(hit_total)
+        report += 'sequences in many set: '+str(seq_total)+"\n"
+        report += 'sequences in hit set:  '+str(hit_total)+"\n"
 
         reportObj = {
             'objects_created':[{'ref':params['workspace_name']+'/'+params['output_filtered_name'], 'description':'VSearch_BasicSearch hits'}],
