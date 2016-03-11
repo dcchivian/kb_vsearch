@@ -968,6 +968,8 @@ class kb_vsearch:
         # build output report object
         #
         self.log(console,"BUILDING REPORT")  # DEBUG
+        self.log(console,"sequences in many set: "+str(seq_total))
+        self.log(console,"sequences in hit set:  "+str(hit_total))
         report += 'sequences in many set: '+str(seq_total)+"\n"
         report += 'sequences in hit set:  '+str(hit_total)+"\n"
 
