@@ -8,7 +8,7 @@
     "categories": ["active","sequence"],
     "widgets": {
         "input": null,
-        "output": "kbaseReportView"
+        "output": "no-display"
     },
     "parameters": [ 
         {
@@ -185,7 +185,7 @@
             "output_mapping": [
                 {
                     "narrative_system_variable": "workspace",
-                    "target_property": "workspaceName"
+                    "target_property": "workspace_name"
                 },
                 {
                     "service_method_output_path": [0, "report_name"],
