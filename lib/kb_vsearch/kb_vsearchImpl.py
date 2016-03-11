@@ -345,24 +345,24 @@ class kb_vsearch:
                 #forward_reads_file_handle.write(input_sequence_buf)        input_sequence_buf = re.sub ('&quot;', '"', input_sequence_buf)
                 for i,line in enumerate(split_input_sequence_buf):
                     if line.startswith('>'):
-                        split_input_sequence_buf[i+1] = re.sub (" ","",split_input_sequence_buf[i+1])
-                        split_input_sequence_buf[i+1] = re.sub ("\t","",split_input_sequence_buf[i+1])
-                        record = "\n".join([split_input_sequence_buf[i], \
-                                        split_input_sequence_buf[i+1].lower()]) \
-                                        + "\n"
-
-                        one_forward_reads_file_handle.write(record)
+                        record_buf = []
+                        record_buf.append(line)
+                        for j in range(i+1,len(split_input_sequence_buf)):
+                            if split_input_sequence_buf[j].startswith('>'):
+                                break
+                            seq_line = re.sub (" ","",split_input_sequence_buf[j])
+                            seq_line = re.sub ("\t","",seq_line)
+                            seq_line = seq_line.lower()
+                            record_buf.append(seq_line)
+                            record = "\n".join(record_buf)+"\n"
                         break  # only want first record
                     elif line.startswith('@'):
-                        split_input_sequence_buf[i+1] = re.sub (" ","",split_input_sequence_buf[i+1])
-                        split_input_sequence_buf[i+1] = re.sub ("\t","",split_input_sequence_buf[i+1])
-                        split_input_sequence_buf[i+3] = re.sub (" ","",split_input_sequence_buf[i+3])
-                        split_input_sequence_buf[i+3] = re.sub ("\t","",split_input_sequence_buf[i+3])
-                        record = "\n".join([split_input_sequence_buf[i], \
-                                        split_input_sequence_buf[i+1].lower(), \
-                                        split_input_sequence_buf[i+2], \
-                                        split_input_sequence_buf[i+3]]) \
-                                        + "\n"
+                        seq_line = re.sub (" ","",split_input_sequence_buf[i+1])
+                        seq_line = re.sub ("\t","",seq_line)
+                        seq_line = seq_line.lower()
+                        qual_line = re.sub (" ","",split_input_sequence_buf[i+3])
+                        qual_line = re.sub ("\t","",qual_line)
+                        record = "\n".join([line, seq_line, split_input_sequence_buf[i+2], qual_line])+"\n"
                         one_forward_reads_file_handle.write(record)
                         break  # only want first record
 
