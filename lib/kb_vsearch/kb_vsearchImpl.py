@@ -456,19 +456,20 @@ class kb_vsearch:
                 ### END NOTE
 
                 # convert FASTQ to FASTA (if necessary)
+                new_file_path = one_forward_reads_file_path+".fna"
+                new_file_handle = open(new_file_path, 'w', 0)
                 one_forward_reads_file_handle = open(one_forward_reads_file_path, 'r', 0)
-                if one_forward_reads_file_handle[0].startswith('@'):
-                    new_file_path = one_forward_reads_file_path+".fna"
-                    new_file_handle = open(new_file_path, 'w', 0)
-                    for i,line in enumerate(one_forward_reads_file_handle):
-                        if line.startswith('@'):
-                            line = line[1:]
-                            new_file_handle.writelines(['>'+line+"\n",
-                                                        one_forward_reads_file_handle[i+1]+"\n"
-                                                        ])
-                    new_file_handle.close()
-                    one_forward_reads_file_handle.close()
-                    one_forward_reads_file_path = new_file_path
+                for i,line in enumerate(one_forward_reads_file_handle):
+                    if line.startswith('>'):
+                        break
+                    elif line.startswith('@'):
+                        line = line[1:]
+                        new_file_handle.writelines(['>'+line+"\n",
+                                                    one_forward_reads_file_handle[i+1]+"\n"
+                                                    ])
+                new_file_handle.close()
+                one_forward_reads_file_handle.close()
+                one_forward_reads_file_path = new_file_path
 
             except Exception as e:
                 print(traceback.format_exc())
@@ -578,19 +579,20 @@ class kb_vsearch:
                 ### END NOTE
 
                 # convert FASTQ to FASTA (if necessary)
+                new_file_path = many_forward_reads_file_path+".fna"
+                new_file_handle = open(new_file_path, 'w', 0)
                 many_forward_reads_file_handle = open(many_forward_reads_file_path, 'r', 0)
-                if many_forward_reads_file_handle[0].startswith('@'):
-                    new_file_path = many_forward_reads_file_path+".fna"
-                    new_file_handle = open(new_file_path, 'w', 0)
-                    for i,line in enumerate(many_forward_reads_file_handle):
-                        if line.startswith('@'):
-                            line = line[1:]
-                            new_file_handle.writelines(['>'+line+"\n",
-                                                        many_forward_reads_file_handle[i+1]+"\n"
-                                                        ])
-                    new_file_handle.close()
-                    many_forward_reads_file_handle.close()
-                    many_forward_reads_file_path = new_file_path
+                for i,line in enumerate(many_forward_reads_file_handle):
+                    if line.startswith('>'):
+                        break
+                    elif line.startswith('@'):
+                        line = line[1:]
+                        new_file_handle.writelines(['>'+line+"\n",
+                                                    many_forward_reads_file_handle[i+1]+"\n"
+                                                    ])
+                new_file_handle.close()
+                many_forward_reads_file_handle.close()
+                many_forward_reads_file_path = new_file_path
 
             except Exception as e:
                 print(traceback.format_exc())
