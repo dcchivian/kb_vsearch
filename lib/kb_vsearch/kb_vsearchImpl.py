@@ -246,8 +246,8 @@ class kb_vsearch:
             raise ValueError('output_filtered_name parameter is required')
 
 
-        #### Get the input_one object
-        ##
+        # Write the input_one_sequence to a SingleEndLibrary object
+        #
         if 'input_one_sequence' in params \
                 and params['input_one_sequence'] != None \
                 and params['input_one_sequence'] != "Optionally enter DNA sequence...":
@@ -397,95 +397,103 @@ class kb_vsearch:
 
             self.log(console, 'done')
 
-        else:  # obtain object
+        #### Get the input_one object
+        ##
+        try:
+            ws = workspaceService(self.workspaceURL, token=ctx['token'])
+            objects = ws.get_objects([{'ref': params['workspace_name']+'/'+params['input_one_name']}])
+            data = objects[0]['data']
+            info = objects[0]['info']
+            # Object Info Contents
+            # absolute ref = info[6] + '/' + info[0] + '/' + info[4]
+            # 0 - obj_id objid
+            # 1 - obj_name name
+            # 2 - type_string type
+            # 3 - timestamp save_date
+            # 4 - int version
+            # 5 - username saved_by
+            # 6 - ws_id wsid
+            # 7 - ws_name workspace
+            # 8 - string chsum
+            # 9 - int size 
+            # 10 - usermeta meta
+            one_type_name = info[2].split('.')[1].split('-')[0]
+        except Exception as e:
+            raise ValueError('Unable to fetch input_one_name object from workspace: ' + str(e))
+        #to get the full stack trace: traceback.format_exc()
+
+        if 'input_one_sequence' in params \
+                and params['input_one_sequence'] != None \
+                and params['input_one_sequence'] != "Optionally enter DNA sequence..." \
+                and one_type_name != 'SingleEndLibrary':
+
+            raise ValueError("ERROR: Mismatched input type: input_one_name should be SingleEndLibrary instead of: "+one_type_name)
+            sys.exit (0)
+
+
+        # Handle overloading (input_one can be Feature, SingleEndLibrary, or FeatureSet)
+        #
+        if one_type_name == 'SingleEndLibrary':
             try:
-                ws = workspaceService(self.workspaceURL, token=ctx['token'])
-                objects = ws.get_objects([{'ref': params['workspace_name']+'/'+params['input_one_name']}])
-                data = objects[0]['data']
-                info = objects[0]['info']
-                # Object Info Contents
-                # absolute ref = info[6] + '/' + info[0] + '/' + info[4]
-                # 0 - obj_id objid
-                # 1 - obj_name name
-                # 2 - type_string type
-                # 3 - timestamp save_date
-                # 4 - int version
-                # 5 - username saved_by
-                # 6 - ws_id wsid
-                # 7 - ws_name workspace
-                # 8 - string chsum
-                # 9 - int size 
-                # 10 - usermeta meta
-                one_type_name = info[2].split('.')[1].split('-')[0]
+                if 'lib' in data:
+                    one_forward_reads = data['lib']['file']
+                elif 'handle' in data:
+                    one_forward_reads = data['handle']
+                else:
+                    self.log(console,"bad structure for 'one_forward_reads'")
+                    raise ValueError("bad structure for 'one_forward_reads'")
+
+                ### NOTE: this section is what could be replaced by the transform services
+                one_forward_reads_file_path = os.path.join(self.scratch,one_forward_reads['file_name'])
+                one_forward_reads_file_handle = open(one_forward_reads_file_path, 'w', 0)
+                self.log(console, 'downloading reads file: '+str(one_forward_reads_file_path))
+                headers = {'Authorization': 'OAuth '+ctx['token']}
+                r = requests.get(one_forward_reads['url']+'/node/'+one_forward_reads['id']+'?download', stream=True, headers=headers)
+                for chunk in r.iter_content(1024):
+                    one_forward_reads_file_handle.write(chunk)
+                one_forward_reads_file_handle.close();
+                self.log(console, 'done')
+                ### END NOTE
+
             except Exception as e:
-                raise ValueError('Unable to fetch input_one_name object from workspace: ' + str(e))
-                #to get the full stack trace: traceback.format_exc()
+                print(traceback.format_exc())
+                raise ValueError('Unable to download single-end read library files: ' + str(e))
 
-            # Handle overloading (input_one can be Feature, SingleEndLibrary, or FeatureSet)
-            #
-            #  Note: currently only support SingleEndLibrary
-            #
-            if one_type_name == 'SingleEndLibrary':
-                try:
-                    if 'lib' in data:
-                        one_forward_reads = data['lib']['file']
-                    elif 'handle' in data:
-                        one_forward_reads = data['handle']
-                    else:
-                        self.log(console,"bad structure for 'one_forward_reads'")
-                        raise ValueError("bad structure for 'one_forward_reads'")
+        elif one_type_name == 'FeatureSet':
+            # retrieve sequences for features
+            input_one_featureSet = data
+            
+            genome2Features = {}
+            features = input_one_featureSet['elements']
+            for fId in features.keys():
+                genomeRef = features[fId][0]
+                if genomeRef not in genome2Features:
+                    genome2Features[genomeRef] = []
+                genome2Features[genomeRef].append(fId)
 
-                    ### NOTE: this section is what could be replaced by the transform services
-                    one_forward_reads_file_path = os.path.join(self.scratch,one_forward_reads['file_name'])
-                    one_forward_reads_file_handle = open(one_forward_reads_file_path, 'w', 0)
-                    self.log(console, 'downloading reads file: '+str(one_forward_reads_file_path))
-                    headers = {'Authorization': 'OAuth '+ctx['token']}
-                    r = requests.get(one_forward_reads['url']+'/node/'+one_forward_reads['id']+'?download', stream=True, headers=headers)
-                    for chunk in r.iter_content(1024):
-                        one_forward_reads_file_handle.write(chunk)
-                    one_forward_reads_file_handle.close();
-                    self.log(console, 'done')
-                    ### END NOTE
+            # export features to FASTA file
+            one_forward_reads_file_path = os.path.join(self.scratch, params['input_one_name']+".fasta")
+            self.log(console, 'writing fasta file: '+one_forward_reads_file_path)
+            records = []
+            for genomeRef in genome2Features:
+                genome = ws.get_objects([{'ref':genomeRef}])[0]['data']
+                these_genomeFeatureIds = genome2Features[genomeRef]
+                for feature in genome['features']:
+                    if feature['id'] in these_genomeFeatureIds:
+                        record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genomeRef+"."+feature['id'])
+                        records.append(record)
+            SeqIO.write(records, one_forward_reads_file_path, "fasta")
 
-                except Exception as e:
-                    print(traceback.format_exc())
-                    raise ValueError('Unable to download single-end read library files: ' + str(e))
+        elif one_type_name == 'Feature':
+            # export feature to FASTA file
+            feature = data
+            one_forward_reads_file_path = os.path.join(self.scratch, params['input_one_name']+".fasta")
+            self.log(console, 'writing fasta file: '+one_forward_reads_file_path)
+            record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description='['+feature['genome_id']+']'+' '+feature['function'])
+            SeqIO.write([record], one_forward_reads_file_path, "fasta")
 
-            elif one_type_name == 'FeatureSet':
-                # retrieve sequences for features
-                input_one_featureSet = data
-
-                genome2Features = {}
-                features = input_one_featureSet['elements']
-                for fId in features.keys():
-                    genomeRef = features[fId][0]
-                    if genomeRef not in genome2Features:
-                        genome2Features[genomeRef] = []
-                        genome2Features[genomeRef].append(fId)
-
-                # export features to FASTA file
-                one_forward_reads_file_path = os.path.join(self.scratch, params['input_one_name']+".fasta")
-                self.log(console, 'writing fasta file: '+one_forward_reads_file_path)
-                records = []
-                for genomeRef in genome2Features:
-                    genome = ws.get_objects([{'ref':genomeRef}])[0]['data']
-                    these_genomeFeatureIds = genome2Features[genomeRef]
-                    for feature in genome['features']:
-                        if feature['id'] in these_genomeFeatureIds:
-                            record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genomeRef+"."+feature['id'])
-                            records.append(record)
-                            SeqIO.write(records, one_forward_reads_file_path, "fasta")
-
-            elif one_type_name == 'Feature':
-                # export feature to FASTA file
-                feature = data
-                one_forward_reads_file_path = os.path.join(self.scratch, params['input_one_name']+".fasta")
-                self.log(console, 'writing fasta file: '+one_forward_reads_file_path)
-                record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description='['+feature['genome_id']+']'+' '+feature['function'])
-                SeqIO.write([record], one_forward_reads_file_path, "fasta")
-
-            else:
-                raise ValueError('Cannot yet handle input_one type of: '+type_name)            
+        else:
+            raise ValueError('Cannot yet handle input_one type of: '+type_name)            
 
 
         #### Get the input_many object
