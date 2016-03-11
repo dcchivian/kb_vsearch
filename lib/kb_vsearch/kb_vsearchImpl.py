@@ -774,7 +774,7 @@ class kb_vsearch:
             last_header = None
             pattern = re.compile('^\S*')
             for line in many_forward_reads_file_handle:
-                self.log(console, 'LINE: '+line)  # DEBUG
+                #self.log(console, 'LINE: '+line)  # DEBUG
                 if line.startswith('>'):
                     seq_total += 1
                     seq_id = line[1:]  # removes '>'
