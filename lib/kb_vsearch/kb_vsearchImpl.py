@@ -739,6 +739,7 @@ class kb_vsearch:
         hit_total = 0
         pattern = re.compile('^\S*')
         for line in output_aln_buf:
+            self.log(console,'ALNOUT LINE: '+line)  # DEBUG
             # hits have lines of format 'Query >1367929'
             if line.startswith('Query >'):
                 #self.log(console,'HIT LINE: '+line)  # DEBUG
@@ -773,8 +774,8 @@ class kb_vsearch:
             last_header = None
             pattern = re.compile('^\S*')
             for line in many_forward_reads_file_handle:
-                self.log(console, 'LINE: '+line)  # DEBUG
                 if line.startswith('>'):
+                    #self.log(console, 'LINE: '+line)  # DEBUG
                     seq_total += 1
                     seq_id = line[1:]  # removes '>'
                     seq_id = pattern.findall(seq_id)[0]
