@@ -459,14 +459,30 @@ class kb_vsearch:
                 new_file_path = one_forward_reads_file_path+".fna"
                 new_file_handle = open(new_file_path, 'w', 0)
                 one_forward_reads_file_handle = open(one_forward_reads_file_path, 'r', 0)
-                for i,line in enumerate(one_forward_reads_file_handle):
+                header = None
+                last_header = None
+                last_seq_buf = None
+                last_line_was_header = False
+                for line in one_forward_reads_file_handle:
                     if line.startswith('>'):
                         break
                     elif line.startswith('@'):
-                        line = line[1:]
-                        new_file_handle.writelines(['>'+line+"\n",
-                                                    one_forward_reads_file_handle[i+1]+"\n"
-                                                    ])
+                        header = line[1:]
+                        if last_header != None:
+                            new_file_handle.write('>'+last_header)
+                            new_file_handle.write(last_seq_buf)
+                        last_seq_buf = None
+                        last_header = header
+                        last_line_was_header = True
+                    elif last_line_was_header:
+                        last_seq_buf = line
+                        last_line_was_header = False
+                    else:
+                        continue
+                if last_header != None:
+                    new_file_handle.write('>'+last_header)
+                    new_file_handle.write(last_seq_buf)
+
                 new_file_handle.close()
                 one_forward_reads_file_handle.close()
                 one_forward_reads_file_path = new_file_path
@@ -582,14 +598,30 @@ class kb_vsearch:
                 new_file_path = many_forward_reads_file_path+".fna"
                 new_file_handle = open(new_file_path, 'w', 0)
                 many_forward_reads_file_handle = open(many_forward_reads_file_path, 'r', 0)
-                for i,line in enumerate(many_forward_reads_file_handle):
+                header = None
+                last_header = None
+                last_seq_buf = None
+                last_line_was_header = False
+                for line in many_forward_reads_file_handle:
                     if line.startswith('>'):
                         break
                     elif line.startswith('@'):
-                        line = line[1:]
-                        new_file_handle.writelines(['>'+line+"\n",
-                                                    many_forward_reads_file_handle[i+1]+"\n"
-                                                    ])
+                        header = line[1:]
+                        if last_header != None:
+                            new_file_handle.write('>'+last_header)
+                            new_file_handle.write(last_seq_buf)
+                        last_seq_buf = None
+                        last_header = header
+                        last_line_was_header = True
+                    elif last_line_was_header:
+                        last_seq_buf = line
+                        last_line_was_header = False
+                    else:
+                        continue
+                if last_header != None:
+                    new_file_handle.write('>'+last_header)
+                    new_file_handle.write(last_seq_buf)
+
                 new_file_handle.close()
                 many_forward_reads_file_handle.close()
                 many_forward_reads_file_path = new_file_path
