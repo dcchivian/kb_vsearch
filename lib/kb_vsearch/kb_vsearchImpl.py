@@ -821,7 +821,7 @@ class kb_vsearch:
         hit_total = 0
         pattern = re.compile('^\S*')
         for line in output_aln_buf:
-            self.log(console,'ALNOUT LINE: '+line)  # DEBUG
+            #self.log(console,'ALNOUT LINE: '+line)  # DEBUG
             # hits have lines of format 'Query >1367929'
             if line.startswith('Query >'):
                 #self.log(console,'HIT LINE: '+line)  # DEBUG
