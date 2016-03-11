@@ -742,7 +742,7 @@ class kb_vsearch:
             #self.log(console,'ALNOUT LINE: '+line)  # DEBUG
             # hits have lines of format 'Query >1367929'
             if line.startswith('Query >'):
-                self.log(console,'HIT LINE: '+line)  # DEBUG
+                #self.log(console,'HIT LINE: '+line)  # DEBUG
                 hit_total += 1
                 hit_seq_id = line[7:]  # removes leading 'Query >'
                 hit_seq_id = pattern.findall(hit_seq_id)[0]
