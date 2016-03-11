@@ -600,7 +600,10 @@ class kb_vsearch:
                 # convert FASTQ to FASTA (if necessary)
                 new_file_path = many_forward_reads_file_path+".fna"
                 new_file_handle = open(new_file_path, 'w', 0)
-                many_forward_reads_file_handle = open(many_forward_reads_file_path, 'r', 0)
+                if many_forward_reads_file_compression == 'gz':
+                    many_forward_reads_file_handle = gzip.open(many_forward_reads_file_path, 'r', 0)
+                else:
+                    many_forward_reads_file_handle = open(many_forward_reads_file_path, 'r', 0)
                 header = None
                 last_header = None
                 last_seq_buf = None
