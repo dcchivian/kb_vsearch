@@ -355,8 +355,8 @@ class kb_vsearch:
                             seq_line = re.sub ("\t","",seq_line)
                             seq_line = seq_line.lower()
                             record_buf.append(seq_line)
-                            record = "\n".join(record_buf)+"\n"
-                            one_forward_reads_file_handle.write(record)
+                        record = "\n".join(record_buf)+"\n"
+                        one_forward_reads_file_handle.write(record)
                         break  # only want first record
                     elif line.startswith('@'):
                         seq_line = re.sub (" ","",split_input_sequence_buf[i+1])
