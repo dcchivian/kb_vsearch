@@ -307,6 +307,7 @@ class kb_vsearch:
                             raise ValueError ("BAD record:\n"+line+"\n")
                             sys.exit(0)
                         one_forward_reads_file_handle.write(line.lower()+"\n")
+                one_forward_reads_file_handle.close()
 
             else:
                 # format checks
@@ -355,6 +356,7 @@ class kb_vsearch:
                             seq_line = seq_line.lower()
                             record_buf.append(seq_line)
                             record = "\n".join(record_buf)+"\n"
+                            one_forward_reads_file_handle.write(record)
                         break  # only want first record
                     elif line.startswith('@'):
                         seq_line = re.sub (" ","",split_input_sequence_buf[i+1])
@@ -366,7 +368,7 @@ class kb_vsearch:
                         one_forward_reads_file_handle.write(record)
                         break  # only want first record
 
-            one_forward_reads_file_handle.close()
+                one_forward_reads_file_handle.close()
 
 
             # load the method provenance from the context object
