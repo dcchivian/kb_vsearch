@@ -977,8 +977,16 @@ class kb_vsearch:
                 output_featureSet['description'] = "VSearch_BasicSearch filtered"
             output_featureSet['element_ordering'] = []
             output_featureSet['elements'] = dict()
+            repeats = {} # DEBUG
             for feature in input_many_genome['features']:
                 seq_total += 1
+
+                # DEBUG
+                if feature['id'] in repeats:
+                    raise ValueError ("REPEAT ID: '"+feature['id']+"'\n")
+                else:
+                    repeats[feature['id']] = 1
+
                 try:
                     in_filtered_set = hit_seq_ids[feature['id']]
                     #self.log(console, 'FOUND HIT: '+feature['id'])  # DEBUG
@@ -986,6 +994,9 @@ class kb_vsearch:
                     output_featureSet['elements'][feature['id']] = [input_many_genome_ref]
                 except:
                     pass
+
+            self.log(console,"SEQ_TOTAL B4: "+seq_total)  # DEBUG
+
 
         # Parse GenomeSet hits into FeatureSet
         #
