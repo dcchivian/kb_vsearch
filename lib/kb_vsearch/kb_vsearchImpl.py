@@ -457,6 +457,19 @@ class kb_vsearch:
                 self.log(console, 'done')
                 ### END NOTE
 
+
+                # remove carriage returns
+                new_file_path = one_forward_reads_file_path+"-CRfree"
+                new_file_handle = open(new_file_path, 'w', 0)
+                one_forward_reads_file_handle = open(one_forward_reads_file_path, 'r', 0)
+                for line in one_forward_reads_file_handle:
+                    line = re.sub("\r","",line)
+                    new_file_handle.write(line)
+                one_forward_reads_file_handle.close();
+                new_file_handle.close()
+                one_forward_reads_file_path = new_file_path
+
+
                 # convert FASTQ to FASTA (if necessary)
                 new_file_path = one_forward_reads_file_path+".fna"
                 new_file_handle = open(new_file_path, 'w', 0)
@@ -598,6 +611,19 @@ class kb_vsearch:
                 many_forward_reads_file_handle.close();
                 self.log(console, 'done')
                 ### END NOTE
+
+
+                # remove carriage returns
+                new_file_path = many_forward_reads_file_path+"-CRfree"
+                new_file_handle = open(new_file_path, 'w', 0)
+                many_forward_reads_file_handle = open(many_forward_reads_file_path, 'r', 0)
+                for line in many_forward_reads_file_handle:
+                    line = re.sub("\r","",line)
+                    new_file_handle.write(line)
+                many_forward_reads_file_handle.close();
+                new_file_handle.close()
+                many_forward_reads_file_path = new_file_path
+
 
                 # convert FASTQ to FASTA (if necessary)
                 new_file_path = many_forward_reads_file_path+".fna"
