@@ -691,11 +691,11 @@ class kb_vsearch:
                     if feature['id'] in these_genomeFeatureIds:
                         try:
                             f_written = feature_written[feature['id']]
+                        except:
+                            feature_written[feature['id']] = True
                             #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
                             record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
                             records.append(record)
-                        except:
-                            feature_written[feature['id']] = True
             SeqIO.write(records, many_forward_reads_file_path, "fasta")
 
 
@@ -713,11 +713,11 @@ class kb_vsearch:
             for feature in input_many_genome['features']:
                 try:
                     f_written = feature_written[feature['id']]
+                except:
+                    feature_written[feature['id']] = True
                     #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
                     record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=input_many_genome['id'])
                     records.append(record)
-                except:
-                    feature_written[feature['id']] = True
             SeqIO.write(records, many_forward_reads_file_path, "fasta")
 
 
@@ -739,11 +739,11 @@ class kb_vsearch:
                     for feature in genome['features']:
                         try:
                             f_written = feature_written[feature['id']]
+                        except:
+                            feature_written[feature['id']] = True
                             #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
                             record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
                             records.append(record)
-                        except:
-                            feature_written[feature['id']] = True
 
                 elif 'data' in input_many_genomeSet['elements'][genome_name] and \
                         input_many_genomeSet['elements'][genome_name]['data'] != None:
@@ -751,11 +751,11 @@ class kb_vsearch:
                     for feature in genome['features']:
                         try:
                             f_written = feature_written[feature['id']]
+                        except:
+                            feature_written[feature['id']] = True
                             #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
                             record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
                             records.append(record)
-                        except:
-                            feature_written[feature['id']] = True
 
                 else:
                     raise ValueError('genome '+genome_name+' missing')
