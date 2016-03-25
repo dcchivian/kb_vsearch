@@ -577,8 +577,6 @@ class kb_vsearch:
 
         # Handle overloading (input_many can be SingleEndLibrary, FeatureSet, Genome, or GenomeSet)
         #
-        #  Note: currently only support SingleEndLibrary
-        #
         if many_type_name == 'SingleEndLibrary':
 
             # DEBUG
