@@ -305,7 +305,6 @@ class kb_vsearch:
                         line = re.sub ("\t","",line)
                         if not DNA_pattern.match(line):
                             raise ValueError ("BAD record:\n"+line+"\n")
-                            sys.exit(0)
                         one_forward_reads_file_handle.write(line.lower()+"\n")
                 one_forward_reads_file_handle.close()
 
@@ -323,7 +322,6 @@ class kb_vsearch:
                                 bad_record = "\n".join([split_input_sequence_buf[i],
                                                     split_input_sequence_buf[i+1]])
                             raise ValueError ("BAD record:\n"+bad_record+"\n")
-                            sys.exit(0)
                         if fastq_format and line.startswith('@'):
                             format_ok = True
                             seq_len = len(split_input_sequence_buf[i+1])
@@ -339,7 +337,6 @@ class kb_vsearch:
                                                     split_input_sequence_buf[i+2],
                                                     split_input_sequence_buf[i+3]])
                                 raise ValueError ("BAD record:\n"+bad_record+"\n")
-                                sys.exit(0)
 
                 # write that sucker, removing spaces
                 #
@@ -421,8 +418,8 @@ class kb_vsearch:
             # 10 - usermeta meta
             one_type_name = info[2].split('.')[1].split('-')[0]
         except Exception as e:
+            traceback.format_exc()
             raise ValueError('Unable to fetch input_one_name object from workspace: ' + str(e))
-        #to get the full stack trace: traceback.format_exc()
 
         if 'input_one_sequence' in params \
                 and params['input_one_sequence'] != None \
@@ -430,7 +427,6 @@ class kb_vsearch:
                 and one_type_name != 'SingleEndLibrary':
 
             raise ValueError("ERROR: Mismatched input type: input_one_name should be SingleEndLibrary instead of: "+one_type_name)
-            sys.exit (0)
 
 
         # Handle overloading (input_one can be Feature, SingleEndLibrary, or FeatureSet)
@@ -779,8 +775,13 @@ class kb_vsearch:
             raise ValueError("no such file '"+self.VSEARCH+"'")
         if not os.path.isfile(one_forward_reads_file_path):
             raise ValueError("no such file '"+one_forward_reads_file_path+"'")
+        elif not os.path.getsize(one_forward_reads_file_path) > 0:
+            raise ValueError("empty file '"+one_forward_reads_file_path+"'")
         if not os.path.isfile(many_forward_reads_file_path):
             raise ValueError("no such file '"+many_forward_reads_file_path+"'")
+        elif not os.path.getsize(many_forward_reads_file_path) > 0:
+            raise ValueError("empty file '"+many_forward_reads_file_path+"'")
+        
 
         # set the output path
         timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
@@ -859,6 +860,11 @@ class kb_vsearch:
         # Valign calls hits "Query" (as strange as that is)
         #
         self.log(console, 'PARSING VSEARCH ALIGNMENT OUTPUT')
+        if not os.path.isfile(output_aln_file_path):
+            raise ValueError("failed to create VSEARCH output: "+output_aln_file_path)
+        elif not os.path.getsize(output_aln_file_path) > 0:
+            raise ValueError("created empty file for VSEARCH output: "+output_aln_file_path)
+
         hit_seq_ids = dict()
         output_aln_file_handle = open (output_aln_file_path, "r", 0)
         output_aln_buf = output_aln_file_handle.readlines()
