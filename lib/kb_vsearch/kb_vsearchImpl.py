@@ -511,6 +511,10 @@ class kb_vsearch:
             
             genome2Features = {}
             features = input_one_featureSet['elements']
+            if len(features.keys())!= 1:
+                    self.log(console,"Too may features in "+params['input_one_name']+" feature set.  Should one have 1 instead of "+len(features.keys()))
+                    raise ValueError("Too may features in "+params['input_one_name']+" feature set.  Should one have 1 instead of "+len(features.keys()))
+
             for fId in features.keys():
                 genomeRef = features[fId][0]
                 if genomeRef not in genome2Features:
