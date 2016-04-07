@@ -225,6 +225,7 @@ class kb_vsearch:
         # return variables are: returnVal
         #BEGIN VSearch_BasicSearch
         console = []
+        invalid_msgs = []
         self.log(console,'Running VSearch_BasicSearch with params=')
         self.log(console, "\n"+pformat(params))
         report = ''
@@ -304,7 +305,7 @@ class kb_vsearch:
                         line = re.sub (" ","",line)
                         line = re.sub ("\t","",line)
                         if not DNA_pattern.match(line):
-                            raise ValueError ("BAD record:\n"+line+"\n")
+                            self.log(invalid_msgs, "BAD record:\n"+line+"\n")
                         one_forward_reads_file_handle.write(line.lower()+"\n")
                 one_forward_reads_file_handle.close()
 
@@ -321,7 +322,7 @@ class kb_vsearch:
                             else:
                                 bad_record = "\n".join([split_input_sequence_buf[i],
                                                     split_input_sequence_buf[i+1]])
-                            raise ValueError ("BAD record:\n"+bad_record+"\n")
+                            self.log(invalid_msgs,"BAD record:\n"+bad_record+"\n")
                         if fastq_format and line.startswith('@'):
                             format_ok = True
                             seq_len = len(split_input_sequence_buf[i+1])
@@ -336,7 +337,7 @@ class kb_vsearch:
                                                     split_input_sequence_buf[i+1],
                                                     split_input_sequence_buf[i+2],
                                                     split_input_sequence_buf[i+3]])
-                                raise ValueError ("BAD record:\n"+bad_record+"\n")
+                                self.log(invalid_msgs,"BAD record:\n"+bad_record+"\n")
 
                 # write that sucker, removing spaces
                 #
@@ -511,9 +512,8 @@ class kb_vsearch:
             
             genome2Features = {}
             features = input_one_featureSet['elements']
-            if len(features.keys())!= 1:
-                    self.log(console,"Too may features in "+params['input_one_name']+" feature set.  Should one have 1 instead of "+len(features.keys()))
-                    raise ValueError("Too may features in "+params['input_one_name']+" feature set.  Should one have 1 instead of "+len(features.keys()))
+            if len(features.keys()) != 1:
+                    self.log(invalid_msgs,"Too may features in "+params['input_one_name']+" feature set.  Should one have 1 instead of "+len(features.keys()))
 
             for fId in features.keys():
                 genomeRef = features[fId][0]
@@ -1078,11 +1078,12 @@ class kb_vsearch:
         #
         self.log(console,"UPLOADING RESULTS")  # DEBUG
 
-        if many_type_name == 'SingleEndLibrary':
+        if len(invalid_msgs) == 0:
+            if many_type_name == 'SingleEndLibrary':
             
-            # input SingleEndLibrary -> upload SingleEndLibrary
-            #
-            self.upload_SingleEndLibrary_to_shock_and_ws (ctx,
+                # input SingleEndLibrary -> upload SingleEndLibrary
+                #
+                self.upload_SingleEndLibrary_to_shock_and_ws (ctx,
                                                           console,  # DEBUG
                                                           params['workspace_name'],
                                                           params['output_filtered_name'],
@@ -1091,8 +1092,8 @@ class kb_vsearch:
                                                           sequencing_tech
                                                          )
 
-        else:  # input FeatureSet, Genome, and GenomeSet -> upload FeatureSet output
-            new_obj_info = ws.save_objects({
+            else:  # input FeatureSet, Genome, and GenomeSet -> upload FeatureSet output
+                new_obj_info = ws.save_objects({
                             'workspace': params['workspace_name'],
                             'objects':[{
                                     'type': 'KBaseCollections.FeatureSet',
@@ -1106,18 +1107,24 @@ class kb_vsearch:
         # build output report object
         #
         self.log(console,"BUILDING REPORT")  # DEBUG
-        self.log(console,"sequences in many set: "+str(seq_total))
-        self.log(console,"sequences in hit set:  "+str(hit_total))
-        report += 'sequences in many set: '+str(seq_total)+"\n"
-        report += 'sequences in hit set:  '+str(hit_total)+"\n"
+        if len(invalid_msgs) == 0:
+            self.log(console,"sequences in many set: "+str(seq_total))
+            self.log(console,"sequences in hit set:  "+str(hit_total))
+            report += 'sequences in many set: '+str(seq_total)+"\n"
+            report += 'sequences in hit set:  '+str(hit_total)+"\n"
 
-        reportObj = {
-            'objects_created':[{'ref':params['workspace_name']+'/'+params['output_filtered_name'], 'description':'VSearch_BasicSearch hits'}],
-            'text_message':report
-        }
-        if 'input_one_sequence' in params and params['input_one_sequence'] != None:
-            reportObj['objects_created'].append({'ref':params['workspace_name']+'/'+params['input_one_name'], 'description':'VSearch_BasicSearch query'})
-                
+            reportObj = {
+                'objects_created':[{'ref':params['workspace_name']+'/'+params['output_filtered_name'], 'description':'VSearch_BasicSearch hits'}],
+                'text_message':report
+                }
+            if 'input_one_sequence' in params and params['input_one_sequence'] != None:
+                reportObj['objects_created'].append({'ref':params['workspace_name']+'/'+params['input_one_name'], 'description':'VSearch_BasicSearch query'})
+        else:
+            report += "FAILURE:\n\n"+"\n".join(invalid_msgs)+"\n"
+            reportObj = {
+                'objects_created':[],
+                'text_message':report
+                }
 
         reportName = 'vsearch_report_'+str(hex(uuid.getnode()))
         report_obj_info = ws.save_objects({
