@@ -40,16 +40,18 @@ RUN make
 WORKDIR /kb/module
 RUN git clone https://github.com/torognes/vsearch
 WORKDIR vsearch
-RUN ./configure 
-RUN make
-RUN make install
+RUN \
+    ./autogen.sh && \
+    ./configure && \
+    make && \
+    make install
 
 
 # add test data
 #
-RUN mkdir -p /kb/module/test
-WORKDIR /kb/module/test
-RUN git clone https://github.com/dcchivian/kb_vsearch_test_data
+#RUN mkdir -p /kb/module/test
+#WORKDIR /kb/module/test
+#RUN git clone https://github.com/dcchivian/kb_vsearch_test_data
 
 
 WORKDIR /kb/module
